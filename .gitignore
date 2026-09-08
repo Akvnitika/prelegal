@@ -1,0 +1,94 @@
+# ============================
+# Python / FastAPI
+# ============================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+wheels/
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Type checkers / linters
+.mypy_cache/
+.ruff_cache/
+.pytype/
+
+# uv / pip
+.pip-cache/
+
+# ============================
+# Node / Next.js
+# ============================
+node_modules/
+.next/
+out/
+.turbo/
+.vercel/
+next-env.d.ts
+
+# Build outputs
+*.tsbuildinfo
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# ============================
+# Environment / secrets
+# ============================
+.env
+.env.*
+!.env.example
+*.pem
+
+# ============================
+# Databases
+# ============================
+*.sqlite
+*.sqlite3
+*.db
+
+# ============================
+# Editors / IDEs
+# ============================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ============================
+# OS files
+# ============================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================
+# Misc
+# ============================
+*.log
+.cache/
+tmp/
+temp/
