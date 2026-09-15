@@ -20,9 +20,15 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Checks
 
 ```bash
+npm test           # Vitest unit, component, and page tests (tests/)
+npm run typecheck  # type-checks app and test files (vitest does not)
 npm run lint
 npm run build
 ```
+
+`npm run test:watch` re-runs tests on change. Browser-only behavior (print
+dialog, native pickers, downloads, responsive layout) is covered by the
+[manual test plan](docs/manual-test-plan.md).
 
 ## Layout
 
@@ -32,3 +38,6 @@ npm run build
 - `lib/nda.ts` — data model and formatting helpers
 - `lib/standard-terms.ts` — Common Paper MNDA Standard Terms v1.0
 - `lib/markdown.ts` — Markdown export of the completed agreement
+- `tests/` — Vitest suite; `tests/lib/standard-terms.test.ts` also diffs the
+  embedded terms against `../templates/Mutual-NDA.md`
+- `docs/manual-test-plan.md` — manual test checklist for browser-only behavior
