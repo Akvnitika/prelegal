@@ -20,9 +20,9 @@ function useToday(): string {
 export default function Home() {
   const [edited, setEdited] = useState(defaultNdaData);
   const [tab, setTab] = useState<NdaTab>("chat");
-  // The chat sends the raw edited state (not `data`), preserving the
+  // Both editors work on the raw edited state (not `data`), preserving the
   // "" effective date so the document keeps floating to today until a
-  // date is actually chosen.
+  // date is actually chosen; `data` resolves it for display only.
   const chat = useNdaChat(edited, (patch) =>
     setEdited((prev) => mergeNdaData(prev, patch)),
   );
@@ -102,7 +102,7 @@ export default function Home() {
                 Fill in the details below. The agreement on the right updates as you
                 type, and you can download it when you&apos;re done.
               </p>
-              <NdaForm data={data} onChange={setEdited} />
+              <NdaForm data={edited} today={today} onChange={setEdited} />
             </div>
           )}
         </div>

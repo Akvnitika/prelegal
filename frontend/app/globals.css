@@ -9,8 +9,10 @@
   --color-highlight: #f4e48a;
   --color-paper: #ffffff;
 
-  /* Brand palette — new screens (login, and future dashboard/chat).
-     The NDA creator keeps the pine tokens above; do not mix the two. */
+  /* Brand palette — new screens (login, future dashboard) and the AI chat
+     surfaces: the chat panel and the Chat/Edit-manually tab bar inside the
+     NDA creator (PL-6). The NDA document, manual form, and creator header
+     keep the pine tokens above; don't restyle one in the other's palette. */
   --color-accent-yellow: #ecad0a;
   --color-blue-primary: #209dd7;
   --color-purple-secondary: #753991;

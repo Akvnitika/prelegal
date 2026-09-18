@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";
 import { NdaForm } from "@/components/nda-form";
-import { DEFAULT_PURPOSE, defaultNdaData, type NdaData } from "@/lib/nda";
+import { DEFAULT_PURPOSE, defaultNdaData, todayIso, type NdaData } from "@/lib/nda";
 
 /**
  * NdaForm is controlled, so tests wrap it in a stateful harness that applies
@@ -16,6 +16,7 @@ function renderForm(initial: NdaData = defaultNdaData()) {
     return (
       <NdaForm
         data={data}
+        today={todayIso()}
         onChange={(next) => {
           latest.data = next;
           setData(next);
@@ -38,6 +39,20 @@ describe("NdaForm", () => {
       await user.clear(purpose);
       await user.type(purpose, "Evaluating a pilot.");
       expect(latest.data.purpose).toBe("Evaluating a pilot.");
+    });
+
+    it("keeps the effective date floating ('' in state) while editing other fields", async () => {
+      const user = userEvent.setup();
+      const latest = renderForm();
+      // The input displays today, but the committed state must stay "" so
+      // the document keeps tracking today until a date is chosen.
+      expect(screen.getByLabelText("Effective date")).toHaveValue(todayIso());
+
+      const party1 = within(screen.getByRole("group", { name: "Party 1" }));
+      await user.type(party1.getByLabelText("Company"), "Acme");
+      await user.type(screen.getByLabelText("Governing law (state)"), "Delaware");
+
+      expect(latest.data.effectiveDate).toBe("");
     });
 
     it("updates the effective date", () => {
