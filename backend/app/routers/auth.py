@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import get_db
@@ -16,7 +17,14 @@ async def _find_or_create(payload: AuthRequest, db: AsyncSession) -> User:
         return existing
     user = User(email=payload.email, name=payload.name, password=payload.password)
     db.add(user)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        # Lost a race with a concurrent request creating the same email
+        # (unique constraint); return the row that won.
+        await db.rollback()
+        result = await db.execute(select(User).where(User.email == payload.email))
+        return result.scalar_one()
     await db.refresh(user)
     return user
 

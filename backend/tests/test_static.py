@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
@@ -8,7 +9,7 @@ from app.main import create_app
 
 
 @pytest.fixture()
-def static_client(settings: Settings) -> TestClient:
+def static_client(settings: Settings) -> Iterator[TestClient]:
     # Synthetic Next.js export layout, so this test needs no real build.
     static = Path(settings.static_dir)
     (static / "nda").mkdir(parents=True)
@@ -16,7 +17,7 @@ def static_client(settings: Settings) -> TestClient:
     (static / "nda" / "index.html").write_text("<h1>nda creator</h1>")
     (static / "404.html").write_text("<h1>not found</h1>")
     with TestClient(create_app(settings), raise_server_exceptions=False) as client:
-        return client
+        yield client
 
 
 def test_root_serves_login_page(static_client: TestClient) -> None:
