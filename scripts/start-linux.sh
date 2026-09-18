@@ -5,7 +5,7 @@ cd "$SCRIPT_DIR/.."
 
 CONTAINER_NAME="prelegal"
 IMAGE_NAME="prelegal:latest"
-PORT="8000"
+PORT="8003"
 
 command -v docker >/dev/null 2>&1 || { echo "Docker is required." >&2; exit 1; }
 
@@ -16,7 +16,7 @@ fi
 
 docker build -t "$IMAGE_NAME" .
 docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
-docker run -d --name "$CONTAINER_NAME" --env-file .env -p "${PORT}:8000" "$IMAGE_NAME" >/dev/null
+docker run -d --name "$CONTAINER_NAME" --env-file .env -p "${PORT}:8003" "$IMAGE_NAME" >/dev/null
 
 for _ in $(seq 1 30); do
   if curl -sf "http://localhost:${PORT}/api/health" >/dev/null 2>&1; then

@@ -24,7 +24,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app = FastAPI(title="Prelegal API", version="0.1.0", lifespan=lifespan)
 
     # Cross-origin requests only happen in local development, where
-    # `next dev` runs on :3000 against this backend on :8000. In Docker the
+    # `next dev` runs on :3000 against this backend on :8003. In Docker the
     # frontend is served same-origin by the static mount below.
     if settings.environment == "development":
         app.add_middleware(

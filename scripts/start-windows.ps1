@@ -5,7 +5,7 @@ Set-Location (Split-Path -Parent $PSScriptRoot)
 
 $ContainerName = "prelegal"
 $ImageName = "prelegal:latest"
-$Port = 8000
+$Port = 8003
 
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     Write-Error "Docker is required."
@@ -22,7 +22,7 @@ docker build -t $ImageName .
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 $existing = docker ps -a --format "{{.Names}}" | Where-Object { $_ -eq $ContainerName }
 if ($existing) { docker rm -f $ContainerName | Out-Null }
-docker run -d --name $ContainerName --env-file .env -p "${Port}:8000" $ImageName | Out-Null
+docker run -d --name $ContainerName --env-file .env -p "${Port}:8003" $ImageName | Out-Null
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 for ($i = 0; $i -lt 30; $i++) {

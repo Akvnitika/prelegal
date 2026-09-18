@@ -45,7 +45,7 @@ scripts/stop-linux.sh
 scripts/start-windows.ps1
 scripts/stop-windows.ps1
 ```
-Backend available at http://localhost:8000
+Backend available at http://localhost:8003
 
 ## Color Scheme
 - Accent Yellow: `#ecad0a`

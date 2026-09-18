@@ -34,7 +34,7 @@ dialog, native pickers, downloads, responsive layout) is covered by the
 
 `npm run build` statically exports the site to `out/` (`output: "export"`),
 which the FastAPI backend serves in production. When developing against a
-local backend, set `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000`.
+local backend, set `NEXT_PUBLIC_API_BASE_URL=http://localhost:8003`.
 
 ## Layout
 

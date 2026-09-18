@@ -23,7 +23,7 @@ scripts\start-windows.ps1
 scripts\stop-windows.ps1
 ```
 
-Then open http://localhost:8000, sign in, and you land in the Mutual NDA
+Then open http://localhost:8003, sign in, and you land in the Mutual NDA
 creator. The login is currently a stub (PL-5): any credentials are accepted
 and nothing is authenticated. The SQLite database is recreated from scratch
 every time the container starts.
@@ -31,8 +31,8 @@ every time the container starts.
 ## Develop
 
 - Frontend: `cd frontend && npm install && npm run dev` → http://localhost:3000
-  (set `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000` to reach a local backend)
-- Backend: `cd backend && uv run fastapi dev app/main.py` → http://localhost:8000
+  (set `NEXT_PUBLIC_API_BASE_URL=http://localhost:8003` to reach a local backend)
+- Backend: `cd backend && uv run fastapi dev app/main.py --port 8003` → http://localhost:8003
   (set `ENVIRONMENT=development` to enable CORS for the next dev server)
 - Tests: `cd backend && uv run pytest` and `cd frontend && npm test`
 

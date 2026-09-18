@@ -1,8 +1,8 @@
 /**
  * Base URL for backend API calls. Empty string means same-origin, which is
  * correct when FastAPI serves the built frontend (Docker/production). For
- * `next dev` on :3000 against a local backend on :8000, set
- * NEXT_PUBLIC_API_BASE_URL=http://localhost:8000 (build-time only).
+ * `next dev` on :3000 against a local backend on :8003, set
+ * NEXT_PUBLIC_API_BASE_URL=http://localhost:8003 (build-time only).
  */
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
