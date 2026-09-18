@@ -14,9 +14,8 @@ const sourceSerif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: "Mutual NDA creator — prelegal",
-  description:
-    "Create a Common Paper Mutual Non-Disclosure Agreement: fill in the key terms, preview the completed document, and download it.",
+  title: "Sign in — prelegal",
+  description: "Sign in to start drafting legal agreements with prelegal.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
