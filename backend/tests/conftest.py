@@ -13,6 +13,9 @@ def settings(tmp_path: Path) -> Settings:
     return Settings(
         database_path=str(tmp_path / "test.db"),
         static_dir=str(tmp_path / "static"),
+        # Chat tests mock the LLM; a non-empty key just gets past the
+        # fail-fast configuration check.
+        openrouter_api_key="test-key",
     )
 
 

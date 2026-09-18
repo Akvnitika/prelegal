@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
+import { ChatPanel } from "@/components/chat-panel";
 import { NdaDocument } from "@/components/nda-document";
 import { NdaForm } from "@/components/nda-form";
+import { NdaTabs, type NdaTab } from "@/components/nda-tabs";
 import { generateMarkdown, markdownFilename } from "@/lib/markdown";
-import { defaultNdaData, todayIso } from "@/lib/nda";
+import { defaultNdaData, mergeNdaData, todayIso } from "@/lib/nda";
+import { useNdaChat } from "@/lib/use-nda-chat";
 
 const subscribeNever = () => () => {};
 
@@ -16,6 +19,13 @@ function useToday(): string {
 
 export default function Home() {
   const [edited, setEdited] = useState(defaultNdaData);
+  const [tab, setTab] = useState<NdaTab>("chat");
+  // Both editors work on the raw edited state (not `data`), preserving the
+  // "" effective date so the document keeps floating to today until a
+  // date is actually chosen; `data` resolves it for display only.
+  const chat = useNdaChat(edited, (patch) =>
+    setEdited((prev) => mergeNdaData(prev, patch)),
+  );
   const today = useToday();
   const data = edited.effectiveDate
     ? edited
@@ -57,13 +67,44 @@ export default function Home() {
       </header>
 
       <main className="flex-1 lg:grid lg:min-h-0 lg:grid-cols-[minmax(21rem,26rem)_1fr]">
-        <div className="form-pane border-b border-rule bg-paper px-5 py-6 sm:px-8 lg:overflow-y-auto lg:border-b-0 lg:border-e lg:[height:calc(100dvh-3.8rem)]">
+        <div
+          className={`form-pane flex flex-col border-b border-rule bg-paper lg:border-b-0 lg:border-e lg:[height:calc(100dvh-3.8rem)] ${
+            tab === "chat" ? "max-lg:h-[70dvh]" : ""
+          }`}
+        >
           <h1 className="sr-only">Create a Mutual Non-Disclosure Agreement</h1>
-          <p className="mb-2 text-sm leading-relaxed text-ink/70">
-            Fill in the details below. The agreement on the right updates as you type, and
-            you can download it when you&apos;re done.
-          </p>
-          <NdaForm data={data} onChange={setEdited} />
+          <div className="px-5 pt-4 sm:px-8">
+            <NdaTabs active={tab} onChange={setTab} />
+          </div>
+          {tab === "chat" ? (
+            <div
+              id="panel-chat"
+              role="tabpanel"
+              aria-labelledby="tab-chat"
+              className="flex min-h-0 flex-1 flex-col"
+            >
+              <ChatPanel
+                messages={chat.messages}
+                sending={chat.sending}
+                error={chat.error}
+                onSend={chat.sendMessage}
+                onRetry={chat.retry}
+              />
+            </div>
+          ) : (
+            <div
+              id="panel-manual"
+              role="tabpanel"
+              aria-labelledby="tab-manual"
+              className="min-h-0 flex-1 px-5 py-6 sm:px-8 lg:overflow-y-auto"
+            >
+              <p className="mb-2 text-sm leading-relaxed text-ink/70">
+                Fill in the details below. The agreement on the right updates as you
+                type, and you can download it when you&apos;re done.
+              </p>
+              <NdaForm data={edited} today={today} onChange={setEdited} />
+            </div>
+          )}
         </div>
 
         <div className="doc-pane bg-desk px-4 py-8 sm:px-8 lg:overflow-y-auto lg:[height:calc(100dvh-3.8rem)]">

@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     static_dir: str = "static"
     environment: str = "production"
     cors_allow_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
+    # litellm reads OPENROUTER_API_KEY from the environment itself; this field
+    # mirrors it so the chat endpoint can fail fast with a clear error when
+    # the key is absent instead of surfacing a provider auth failure.
+    openrouter_api_key: str = ""
 
     @property
     def cors_origins(self) -> list[str]:

@@ -92,3 +92,4 @@ desktop.ini
 .cache/
 tmp/
 temp/
+.playwright-mcp/

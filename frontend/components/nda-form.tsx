@@ -72,10 +72,12 @@ function YearsInput({
 
 interface NdaFormProps {
   data: NdaData;
+  /** Today's ISO date, shown while effectiveDate is "" (still floating). */
+  today: string;
   onChange: (next: NdaData) => void;
 }
 
-export function NdaForm({ data, onChange }: NdaFormProps) {
+export function NdaForm({ data, today, onChange }: NdaFormProps) {
   const update = (patch: Partial<NdaData>) => onChange({ ...data, ...patch });
 
   const partyFields = (key: "party1" | "party2", label: string) => {
@@ -139,11 +141,13 @@ export function NdaForm({ data, onChange }: NdaFormProps) {
           <p className="text-xs text-ink/75">How Confidential Information may be used.</p>
         </Field>
         <Field label="Effective date" htmlFor="effective-date">
+          {/* Display resolves the "" sentinel to today; the committed state
+              keeps "" so unrelated edits never pin the floating date. */}
           <input
             id="effective-date"
             type="date"
             className={inputCls}
-            value={data.effectiveDate}
+            value={data.effectiveDate || today}
             onChange={(e) => update({ effectiveDate: e.target.value })}
           />
         </Field>
