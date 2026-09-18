@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 
+# auto-generated agent rules (removed in PL-5; next dev may recreate it)
+/AGENTS.md
+
 # debug
 npm-debug.log*
 yarn-debug.log*
