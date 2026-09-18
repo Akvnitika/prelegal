@@ -8,6 +8,15 @@
   --color-rule: #ccd2c6;
   --color-highlight: #f4e48a;
   --color-paper: #ffffff;
+
+  /* Brand palette — new screens (login, and future dashboard/chat).
+     The NDA creator keeps the pine tokens above; do not mix the two. */
+  --color-accent-yellow: #ecad0a;
+  --color-blue-primary: #209dd7;
+  --color-purple-secondary: #753991;
+  --color-navy: #032147;
+  --color-gray-text: #888888;
+
   --font-sans: var(--font-plex-sans);
   --font-serif: var(--font-source-serif);
 }

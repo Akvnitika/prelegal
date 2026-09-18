@@ -30,9 +30,19 @@ npm run build
 dialog, native pickers, downloads, responsive layout) is covered by the
 [manual test plan](docs/manual-test-plan.md).
 
+## Build
+
+`npm run build` statically exports the site to `out/` (`output: "export"`),
+which the FastAPI backend serves in production. When developing against a
+local backend, set `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000`.
+
 ## Layout
 
-- `app/page.tsx` — the creator page: form state, download and print actions
+- `app/page.tsx` — the login page (PL-5 stub: any credentials are accepted)
+- `app/nda/page.tsx` — the creator page: form state, download and print actions
+- `components/login-form.tsx` — sign-in/sign-up form for the fake login
+- `lib/api.ts` — fetch wrapper for backend API calls
+- `lib/auth.ts` — auth API calls and the localStorage session placeholder
 - `components/nda-form.tsx` — form for the Cover Page fields
 - `components/nda-document.tsx` — the rendered agreement (Cover Page + Standard Terms)
 - `lib/nda.ts` — data model and formatting helpers
