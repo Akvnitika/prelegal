@@ -42,6 +42,50 @@ export function defaultNdaData(): NdaData {
   };
 }
 
+/**
+ * Sparse patch produced by the AI chat: only fields learned this turn are
+ * set. `null` and `undefined` both mean "no change" — a patch can never
+ * clear a field.
+ */
+export type PartyInfoPatch = { [K in keyof PartyInfo]?: PartyInfo[K] | null };
+
+export type NdaDataPatch = {
+  [K in keyof Omit<NdaData, "party1" | "party2">]?: NdaData[K] | null;
+} & {
+  party1?: PartyInfoPatch | null;
+  party2?: PartyInfoPatch | null;
+};
+
+function mergeParty(
+  base: PartyInfo,
+  patch: PartyInfoPatch | null | undefined,
+): PartyInfo {
+  if (!patch) return base;
+  const next = { ...base };
+  for (const key of Object.keys(base) as (keyof PartyInfo)[]) {
+    const value = patch[key];
+    if (value !== null && value !== undefined) next[key] = value;
+  }
+  return next;
+}
+
+/** Applies a chat patch immutably; unset/null patch values keep the base. */
+export function mergeNdaData(base: NdaData, patch: NdaDataPatch): NdaData {
+  const next: NdaData = {
+    ...base,
+    party1: mergeParty(base.party1, patch.party1),
+    party2: mergeParty(base.party2, patch.party2),
+  };
+  for (const key of Object.keys(patch) as (keyof NdaDataPatch)[]) {
+    if (key === "party1" || key === "party2") continue;
+    const value = patch[key];
+    if (value !== null && value !== undefined) {
+      (next as unknown as Record<string, unknown>)[key] = value;
+    }
+  }
+  return next;
+}
+
 const MONTHS = [
   "January",
   "February",

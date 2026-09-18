@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import Settings, get_settings
 from app.db import init_db
-from app.routers import auth, health
+from app.routers import auth, chat, health
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -22,6 +22,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         await engine.dispose()
 
     app = FastAPI(title="Prelegal API", version="0.1.0", lifespan=lifespan)
+    app.state.settings = settings
 
     # Cross-origin requests only happen in local development, where
     # `next dev` runs on :3000 against this backend on :8003. In Docker the
@@ -37,6 +38,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.include_router(health.router, prefix="/api")
     app.include_router(auth.router, prefix="/api/auth")
+    app.include_router(chat.router, prefix="/api")
 
     # The static mount must be registered after every API router: a mount at
     # "/" matches all paths, so anything registered later is unreachable.

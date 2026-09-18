@@ -5,6 +5,7 @@ import {
   effectiveDateDisplay,
   emptyParty,
   formatEffectiveDate,
+  mergeNdaData,
   pluralYears,
   SIGNATURE_ROWS,
   todayIso,
@@ -44,6 +45,56 @@ describe("defaultNdaData", () => {
     const data = defaultNdaData();
     expect(data.party1).not.toBe(data.party2);
     expect(defaultNdaData().party1).not.toBe(data.party1);
+  });
+});
+
+describe("mergeNdaData", () => {
+  it("overwrites scalar fields that are set in the patch", () => {
+    const merged = mergeNdaData(defaultNdaData(), {
+      governingLaw: "Delaware",
+      mndaTermYears: 3,
+    });
+    expect(merged.governingLaw).toBe("Delaware");
+    expect(merged.mndaTermYears).toBe(3);
+    expect(merged.purpose).toBe(DEFAULT_PURPOSE);
+  });
+
+  it("treats null and undefined patch values as no-ops", () => {
+    const base = { ...defaultNdaData(), governingLaw: "Delaware" };
+    const merged = mergeNdaData(base, {
+      governingLaw: null,
+      jurisdiction: undefined,
+    });
+    expect(merged.governingLaw).toBe("Delaware");
+    expect(merged.jurisdiction).toBe("");
+  });
+
+  it("deep-merges party fields instead of replacing the object", () => {
+    const base = defaultNdaData();
+    base.party1 = { company: "Acme", name: "Jordan", title: "", address: "" };
+    const merged = mergeNdaData(base, {
+      party1: { title: "CEO", name: null },
+      party2: { company: "Globex" },
+    });
+    expect(merged.party1).toEqual({
+      company: "Acme",
+      name: "Jordan",
+      title: "CEO",
+      address: "",
+    });
+    expect(merged.party2.company).toBe("Globex");
+  });
+
+  it("does not mutate the base object", () => {
+    const base = defaultNdaData();
+    const snapshot = JSON.parse(JSON.stringify(base));
+    mergeNdaData(base, { governingLaw: "Delaware", party1: { company: "Acme" } });
+    expect(base).toEqual(snapshot);
+  });
+
+  it("returns an equal object for an empty patch", () => {
+    const base = defaultNdaData();
+    expect(mergeNdaData(base, {})).toEqual(base);
   });
 });
 
