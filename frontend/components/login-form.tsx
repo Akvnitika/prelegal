@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { ApiError } from "@/lib/api";
 import { signIn, signUp, storeSession } from "@/lib/auth";
 
 type Mode = "signin" | "signup";
@@ -23,15 +24,21 @@ export function LoginForm() {
     setError(null);
     try {
       const request = mode === "signin" ? signIn : signUp;
-      const { user } = await request({
+      const session = await request({
         email,
         password,
         ...(mode === "signup" && name ? { name } : {}),
       });
-      storeSession(user);
-      router.push("/create/");
-    } catch {
-      setError("Something went wrong. Please try again.");
+      storeSession(session);
+      router.push("/documents/");
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        setError("An account with this email already exists — try signing in.");
+      } else if (err instanceof ApiError && err.status === 401) {
+        setError("Incorrect email or password.");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
       setSubmitting(false);
     }
   }
@@ -73,6 +80,7 @@ export function LoginForm() {
         <input
           type="password"
           required
+          minLength={mode === "signup" ? 8 : undefined}
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           autoComplete={mode === "signin" ? "current-password" : "new-password"}

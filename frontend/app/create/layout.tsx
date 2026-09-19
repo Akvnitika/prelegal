@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { RequireAuth } from "@/components/require-auth";
 
 export const metadata: Metadata = {
   title: "Document creator — prelegal",
@@ -11,5 +12,5 @@ export default function CreateLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return <RequireAuth>{children}</RequireAuth>;
 }

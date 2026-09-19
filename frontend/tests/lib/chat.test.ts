@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "@/lib/api";
 import {
   GREETING,
@@ -7,13 +7,24 @@ import {
   type ChatMessage,
 } from "@/lib/chat";
 import { defaultNdaData } from "@/lib/nda";
+import { storeSession } from "@/lib/session";
 
 const fetchMock = vi.fn();
 vi.stubGlobal("fetch", fetchMock);
 
+beforeEach(() => {
+  // postChat requires a session since PL-8; the token travels in headers
+  // only, so the golden body fixtures are unaffected.
+  storeSession({
+    token: "tok-123",
+    user: { id: 1, email: "tester@example.com", name: null },
+  });
+});
+
 afterEach(() => {
   fetchMock.mockReset();
   vi.useRealTimers();
+  window.localStorage.clear();
 });
 
 // Cross-stack contract fixtures: backend/tests/test_chat.py asserts the same

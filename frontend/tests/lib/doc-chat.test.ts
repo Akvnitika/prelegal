@@ -1,13 +1,24 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type ChatMessage } from "@/lib/chat";
 import { GREETING, initialMessages, postDocChat } from "@/lib/doc-chat";
+import { storeSession } from "@/lib/session";
 
 const fetchMock = vi.fn();
 vi.stubGlobal("fetch", fetchMock);
 
+beforeEach(() => {
+  // postDocChat requires a session since PL-8; the token travels in headers
+  // only, so the golden body fixtures are unaffected.
+  storeSession({
+    token: "tok-123",
+    user: { id: 1, email: "tester@example.com", name: null },
+  });
+});
+
 afterEach(() => {
   fetchMock.mockReset();
   vi.useRealTimers();
+  window.localStorage.clear();
 });
 
 // Cross-stack contract fixtures: backend/tests/test_doc_chat_router.py

@@ -1,12 +1,15 @@
-import { apiPost } from "@/lib/api";
+import { apiPost, authorizedPost } from "@/lib/api";
+import {
+  clearSession,
+  type AuthUser,
+  type Session,
+} from "@/lib/session";
 
-export interface AuthUser {
-  id: number;
-  email: string;
-  name: string | null;
-}
+export type { AuthUser, Session };
+export { clearSession, readSession, storeSession } from "@/lib/session";
 
 export interface AuthResponse {
+  token: string;
   user: AuthUser;
 }
 
@@ -19,24 +22,15 @@ export interface AuthCredentials {
 export const signUp = (credentials: AuthCredentials) =>
   apiPost<AuthResponse>("/api/auth/signup", credentials);
 
-export const signIn = (credentials: AuthCredentials) =>
+export const signIn = (credentials: { email: string; password: string }) =>
   apiPost<AuthResponse>("/api/auth/login", credentials);
 
-// Placeholder "session": PL-5 has no authentication, so the signed-in user
-// is only remembered in localStorage and nothing enforces it. Real auth
-// replaces this with a server-side session.
-const SESSION_KEY = "prelegal.currentUser";
-
-export const storeSession = (user: AuthUser) =>
-  window.localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-
-export const readSession = (): AuthUser | null => {
-  const raw = window.localStorage.getItem(SESSION_KEY);
+/** Invalidates the server session (best effort) and clears the local one. */
+export async function signOut(): Promise<void> {
   try {
-    return raw ? (JSON.parse(raw) as AuthUser) : null;
+    await authorizedPost<void>("/api/auth/signout", {});
   } catch {
-    return null;
+    // The local session is cleared regardless; a dead token is harmless.
   }
-};
-
-export const clearSession = () => window.localStorage.removeItem(SESSION_KEY);
+  clearSession();
+}

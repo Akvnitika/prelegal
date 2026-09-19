@@ -1,4 +1,4 @@
-import { apiPost } from "@/lib/api";
+import { authorizedPost } from "@/lib/api";
 import { todayIso, type NdaData, type NdaDataPatch } from "@/lib/nda";
 
 export interface ChatMessage {
@@ -29,7 +29,7 @@ export const initialMessages = (): ChatMessage[] => [
  * so "today" means the viewer's timezone, mirroring todayIso() elsewhere.
  */
 export const postChat = (transcript: ChatMessage[], ndaData: NdaData) =>
-  apiPost<ChatResponseBody>("/api/chat", {
+  authorizedPost<ChatResponseBody>("/api/chat", {
     transcript,
     ndaData,
     today: todayIso(),
