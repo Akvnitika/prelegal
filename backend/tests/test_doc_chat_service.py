@@ -128,6 +128,62 @@ def test_missing_reply_falls_back_but_keeps_updates() -> None:
     assert doc_chat.to_wire_updates(result) == {"Provider": "Acme"}
 
 
+BAA_COMPLETE_FIELDS = {
+    "Provider": "MedCloud Ltd",
+    "Company": "St Mary's Health Partners",
+    "BAA Effective Date": "2026-09-19",
+    "Agreement": "the CSA dated January 5, 2027",
+    "Limitations": "None",
+    "Breach Notification Period": "5 business days",
+}
+
+
+def _turn(reply: str, updates: dict[str, str]) -> doc_chat.DocChatTurnResult:
+    return doc_chat.DocChatTurnResult(
+        reply=reply,
+        updates=[
+            doc_chat.DocFieldUpdate(name=n, value=v) for n, v in updates.items()
+        ],
+    )
+
+
+def test_completion_override_replaces_missed_announcement() -> None:
+    # The model extracted everything but asked about a field the BAA
+    # doesn't have (observed live) — the backend substitutes the
+    # deterministic ready-for-review announcement.
+    result = doc_chat._apply_completion_override(
+        _turn("Got it. What is the governing law?", BAA_COMPLETE_FIELDS),
+        make_request(document_key="baa", fields={}),
+    )
+    assert "ready for review" in result.reply
+    assert "not legal advice" in result.reply
+    assert doc_chat.to_wire_updates(result) == BAA_COMPLETE_FIELDS
+
+
+def test_completion_override_keeps_model_announcement() -> None:
+    result = doc_chat._apply_completion_override(
+        _turn("All set — your BAA is Ready for Review!", BAA_COMPLETE_FIELDS),
+        make_request(document_key="baa", fields={}),
+    )
+    assert result.reply == "All set — your BAA is Ready for Review!"
+
+
+def test_completion_override_does_not_repeat_after_completion() -> None:
+    result = doc_chat._apply_completion_override(
+        _turn("Updated the breach period.", {"Breach Notification Period": "3 days"}),
+        make_request(document_key="baa", fields=BAA_COMPLETE_FIELDS),
+    )
+    assert result.reply == "Updated the breach period."
+
+
+def test_completion_override_ignores_incomplete_documents() -> None:
+    result = doc_chat._apply_completion_override(
+        _turn("Who is the company?", {"Provider": "MedCloud Ltd"}),
+        make_request(document_key="baa", fields={}),
+    )
+    assert result.reply == "Who is the company?"
+
+
 def test_nda_key_hands_off_without_llm(monkeypatch) -> None:
     def _boom(**kwargs):
         raise AssertionError("completion must not be called for the NDA handoff")

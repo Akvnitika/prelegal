@@ -41,6 +41,13 @@ NDA_HANDOFF_REPLY = (
     "dedicated NDA creator, where I'll help you fill it in."
 )
 
+READY_FOR_REVIEW_REPLY = (
+    "That's everything I need — your {name} is ready for review. Check the "
+    'live preview on the right, or adjust any detail from the "Edit '
+    'manually" tab. One reminder: this is an AI-generated draft, not legal '
+    "advice — have a lawyer review it before signing."
+)
+
 
 # --- The structured-output contract the LLM must produce -------------------
 
@@ -270,6 +277,31 @@ def parse_llm_output(raw: str, current_document_key: str | None) -> DocChatTurnR
 # --- The turn ---------------------------------------------------------------
 
 
+def _is_complete(spec: DocumentSpec, values: dict[str, str]) -> bool:
+    return all(values.get(f.name, "").strip() for f in spec.fields)
+
+
+def _apply_completion_override(
+    result: DocChatTurnResult, req: DocChatRequest
+) -> DocChatTurnResult:
+    """The prompt asks the model to announce completion, but that isn't
+    reliable (observed: inventing follow-up questions about fields the
+    document doesn't have). The backend knows completeness exactly, so when
+    this turn's updates complete the document and the model didn't announce
+    it, substitute the deterministic announcement."""
+    if req.document_key not in REGISTRY or result.selected_document is not None:
+        return result
+    spec = REGISTRY[req.document_key]
+    merged = {**req.fields, **{u.name: u.value for u in result.updates}}
+    just_completed = not _is_complete(spec, req.fields) and _is_complete(spec, merged)
+    if just_completed and "ready for review" not in result.reply.lower():
+        return DocChatTurnResult(
+            reply=READY_FOR_REVIEW_REPLY.format(name=spec.name),
+            updates=result.updates,
+        )
+    return result
+
+
 def run_chat_turn(req: DocChatRequest) -> DocChatTurnResult:
     """One conversational turn. Raises only on transport/provider errors."""
     if req.document_key == NDA_KEY:
@@ -286,7 +318,8 @@ def run_chat_turn(req: DocChatRequest) -> DocChatTurnResult:
         allowed_openai_params=["reasoning_effort"],
         extra_body=EXTRA_BODY,
     )
-    return parse_llm_output(response.choices[0].message.content, req.document_key)
+    result = parse_llm_output(response.choices[0].message.content, req.document_key)
+    return _apply_completion_override(result, req)
 
 
 def to_wire_updates(result: DocChatTurnResult) -> dict[str, str]:
