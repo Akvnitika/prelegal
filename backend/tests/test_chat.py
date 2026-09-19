@@ -13,7 +13,14 @@ from fastapi.testclient import TestClient
 from app.config import Settings
 from app.main import create_app
 from app.services import nda_chat
+from tests.conftest import signup_headers
 from tests.test_nda_chat_service import DEFAULT_NDA
+
+
+@pytest.fixture(autouse=True)
+def _sign_in(client: TestClient, auth_headers: dict[str, str]) -> None:
+    """Chat requires a session since PL-8; pre-auth the shared client."""
+    client.headers.update(auth_headers)
 
 GOLDEN_REQUEST = {
     "transcript": [
@@ -88,15 +95,27 @@ def test_chat_without_api_key_returns_503(
 ) -> None:
     stub = llm_stub(GOLDEN_LLM_OUTPUT)
     monkeypatch.setattr(nda_chat, "completion", stub)
+    # Separate DB file: the module's autouse fixture keeps the shared
+    # client's database open, and Windows won't let init_db unlink it.
     settings = Settings(
-        database_path=str(tmp_path / "test.db"),
+        database_path=str(tmp_path / "nokey.db"),
         static_dir=str(tmp_path / "static"),
         openrouter_api_key="",
+        pbkdf2_iterations=1000,
     )
     with TestClient(create_app(settings)) as client:
+        # Missing auth outranks the missing LLM key...
+        assert client.post("/api/chat", json=GOLDEN_REQUEST).status_code == 401
+        # ...and a signed-in caller gets the configuration error.
+        client.headers.update(signup_headers(client))
         response = client.post("/api/chat", json=GOLDEN_REQUEST)
     assert response.status_code == 503
     assert stub.calls == []
+
+
+def test_chat_requires_auth(client: TestClient) -> None:
+    client.headers.pop("Authorization", None)
+    assert client.post("/api/chat", json=GOLDEN_REQUEST).status_code == 401
 
 
 def test_chat_llm_failure_returns_502(

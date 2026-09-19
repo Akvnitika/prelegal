@@ -2,13 +2,17 @@ import logging
 
 from fastapi import APIRouter, Request
 
+from fastapi import Depends
+
 from app.routers.common import run_guarded_turn
 from app.schemas.chat import ChatRequest, ChatResponse
+from app.security import get_current_user
 from app.services import nda_chat
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(tags=["chat"])
+# LLM turns cost real provider spend; only signed-in users may run them.
+router = APIRouter(tags=["chat"], dependencies=[Depends(get_current_user)])
 
 
 # Sync handler on purpose: litellm's completion() is blocking, and FastAPI

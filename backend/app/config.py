@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     # mirrors it so the chat endpoint can fail fast with a clear error when
     # the key is absent instead of surfacing a provider auth failure.
     openrouter_api_key: str = ""
+    # PBKDF2-HMAC-SHA256 work factor. Tests dial this down (hashing runs on
+    # every signup fixture); production keeps the OWASP-recommended default.
+    pbkdf2_iterations: int = 600_000
 
     @property
     def cors_origins(self) -> list[str]:

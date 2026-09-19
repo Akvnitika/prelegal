@@ -2,14 +2,18 @@ import logging
 
 from fastapi import APIRouter, HTTPException, Request
 
+from fastapi import Depends
+
 from app.documents.registry import NDA_KEY, REGISTRY
 from app.routers.common import run_guarded_turn
 from app.schemas.doc_chat import DocChatRequest, DocChatResponse
+from app.security import get_current_user
 from app.services import doc_chat
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(tags=["doc-chat"])
+# LLM turns cost real provider spend; only signed-in users may run them.
+router = APIRouter(tags=["doc-chat"], dependencies=[Depends(get_current_user)])
 
 
 # Sync handler on purpose: litellm's completion() is blocking, and FastAPI

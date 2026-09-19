@@ -1,10 +1,16 @@
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
-class AuthRequest(BaseModel):
+class SignupRequest(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(min_length=8, max_length=128)
     name: str | None = None
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    # No length rule here: a wrong short password is a 401, not a 422.
+    password: str
 
 
 class UserOut(BaseModel):
@@ -16,4 +22,5 @@ class UserOut(BaseModel):
 
 
 class AuthResponse(BaseModel):
+    token: str
     user: UserOut

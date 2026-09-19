@@ -5,13 +5,15 @@ from app.main import create_app
 
 
 def test_database_is_recreated_on_every_boot(settings: Settings) -> None:
-    creds = {"email": "jane@example.com", "password": "pw"}
+    creds = {"email": "jane@example.com", "password": "password123"}
 
     with TestClient(create_app(settings)) as client:
         assert client.post("/api/auth/signup", json=creds).status_code == 200
 
     # A fresh app process against the same database path must start empty:
-    # login auto-provisions, so a brand-new id proves the table was wiped.
+    # the same email signs up again without a 409 and gets id 1 back,
+    # proving the users table was wiped.
     with TestClient(create_app(settings)) as client:
-        user = client.post("/api/auth/login", json=creds).json()["user"]
-        assert user["id"] == 1
+        response = client.post("/api/auth/signup", json=creds)
+        assert response.status_code == 200
+        assert response.json()["user"]["id"] == 1
