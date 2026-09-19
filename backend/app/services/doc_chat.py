@@ -120,6 +120,9 @@ HOW TO CONVERSE:
 - Never invent a value the user hasn't given or clearly implied. Where a
   field is commonly "None" (modifications, extra warranties), offer that
   as the easy default.
+- Values are inserted into sentences that usually already say "the"
+  before them — don't start a value with "the" ("Fees paid", not "the
+  Fees paid"; "courts of England and Wales", not "the courts of...").
 - ALWAYS end your reply with one specific follow-up question about the
   single most useful missing field — never leave the user without a next
   step while information is still needed.

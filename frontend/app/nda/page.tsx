@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useState, useSyncExternalStore } from "react";
 import { ChatPanel } from "@/components/chat-panel";
 import { NdaDocument } from "@/components/nda-document";
 import { NdaForm } from "@/components/nda-form";
-import { NdaTabs, type NdaTab } from "@/components/nda-tabs";
+import { CreatorTabs, type CreatorTab } from "@/components/creator-tabs";
 import { generateMarkdown, markdownFilename } from "@/lib/markdown";
 import { defaultNdaData, mergeNdaData, todayIso } from "@/lib/nda";
 import { useNdaChat } from "@/lib/use-nda-chat";
@@ -19,7 +19,7 @@ function useToday(): string {
 
 export default function Home() {
   const [edited, setEdited] = useState(defaultNdaData);
-  const [tab, setTab] = useState<NdaTab>("chat");
+  const [tab, setTab] = useState<CreatorTab>("chat");
   // Both editors work on the raw edited state (not `data`), preserving the
   // "" effective date so the document keeps floating to today until a
   // date is actually chosen; `data` resolves it for display only.
@@ -74,7 +74,7 @@ export default function Home() {
         >
           <h1 className="sr-only">Create a Mutual Non-Disclosure Agreement</h1>
           <div className="px-5 pt-4 sm:px-8">
-            <NdaTabs active={tab} onChange={setTab} />
+            <CreatorTabs active={tab} onChange={setTab} />
           </div>
           {tab === "chat" ? (
             <div

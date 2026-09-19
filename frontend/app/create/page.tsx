@@ -1,13 +1,14 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ChatPanel } from "@/components/chat-panel";
 import { DocumentGallery } from "@/components/document-picker";
 import { GenericForm } from "@/components/generic-form";
-import { NdaTabs, type NdaTab } from "@/components/nda-tabs";
+import { CreatorTabs, type CreatorTab } from "@/components/creator-tabs";
 import {
   MUTUAL_NDA_KEY,
+  MUTUAL_NDA_SUMMARY,
   useDocumentCatalog,
   useDocumentDetail,
 } from "@/lib/documents";
@@ -23,7 +24,7 @@ export default function CreatePage() {
   const router = useRouter();
   const [documentKey, setDocumentKey] = useState<string | null>(null);
   const [fields, setFields] = useState<Record<string, string>>({});
-  const [tab, setTab] = useState<NdaTab>("chat");
+  const [tab, setTab] = useState<CreatorTab>("chat");
 
   const catalog = useDocumentCatalog();
   const { detail, error: detailError, retry: retryDetail } =
@@ -48,9 +49,14 @@ export default function CreatePage() {
     [detail],
   );
 
+  const allDocuments =
+    catalog.documents.length > 0
+      ? [MUTUAL_NDA_SUMMARY, ...catalog.documents]
+      : [];
+
   const quickPicks =
     documentKey === null
-      ? catalog.documents.map((doc) => ({
+      ? allDocuments.map((doc) => ({
           label: doc.name,
           prompt: `I need a ${doc.name}.`,
         }))
@@ -103,7 +109,7 @@ export default function CreatePage() {
         >
           <h1 className="sr-only">Create a legal document</h1>
           <div className="px-5 pt-4 sm:px-8">
-            <NdaTabs active={tab} onChange={setTab} />
+            <CreatorTabs active={tab} onChange={setTab} />
           </div>
           {tab === "chat" ? (
             <div
@@ -186,7 +192,7 @@ export default function CreatePage() {
                   </button>
                 </div>
               ) : (
-                <DocumentGallery documents={catalog.documents} />
+                <DocumentGallery documents={allDocuments} />
               )}
             </>
           )}

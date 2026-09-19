@@ -22,6 +22,20 @@ export interface DocumentSummary {
   fields: FieldMeta[];
 }
 
+/** GET /api/documents only serves the generic registry; the NDA lives in
+ * its own creator. This synthesized entry keeps the NDA visible in the
+ * quick-pick chips and gallery — selecting it routes to /nda/. */
+export const MUTUAL_NDA_SUMMARY: DocumentSummary = {
+  key: MUTUAL_NDA_KEY,
+  name: "Mutual Non-Disclosure Agreement",
+  description:
+    "Common Paper Mutual Non-Disclosure Agreement (MNDA) standard terms, " +
+    "allowing each party to disclose confidential information to the other " +
+    "while requiring both to protect it.",
+  about: "",
+  fields: [],
+};
+
 export interface DocumentDetail extends DocumentSummary {
   templateMarkdown: string;
 }
