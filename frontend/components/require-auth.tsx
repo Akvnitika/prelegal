@@ -2,7 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useSyncExternalStore, type ReactNode } from "react";
-import { readSessionSnapshot, subscribeNever } from "@/lib/session";
+import {
+  readSession,
+  readSessionSnapshot,
+  subscribeNever,
+} from "@/lib/session";
 
 /**
  * Client-side gate for signed-in screens. Static export has no server
@@ -19,7 +23,10 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    if (session === null) router.replace("/");
+    // Re-read storage directly: during hydration the first render (and so
+    // this effect's captured `session`) sees the null server snapshot even
+    // when a session exists — the render value catches up a beat later.
+    if (readSession() === null) router.replace("/");
   }, [session, router]);
 
   if (session === null) {
