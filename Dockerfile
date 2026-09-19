@@ -26,7 +26,7 @@ RUN useradd --create-home --uid 1000 appuser
 WORKDIR /app/backend
 COPY --from=backend-build /app/backend /app/backend
 COPY --from=frontend-build /src/frontend/out /app/static
-# Data files for upcoming AI-chat tickets; nothing reads them yet.
+# Read at runtime by app/paths.py (document registry, template previews).
 COPY templates/ /app/templates/
 COPY catalog.json /app/catalog.json
 ENV PATH="/app/backend/.venv/bin:${PATH}" \

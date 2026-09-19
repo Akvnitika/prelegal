@@ -28,5 +28,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
+export const apiGet = <T>(path: string) => apiFetch<T>(path);
+
 export const apiPost = <T>(path: string, body: unknown) =>
   apiFetch<T>(path, { method: "POST", body: JSON.stringify(body) });

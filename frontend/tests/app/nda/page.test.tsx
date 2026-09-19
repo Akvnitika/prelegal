@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+﻿import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import Home from "@/app/nda/page";
@@ -123,7 +123,7 @@ describe("Home page", () => {
     await screen.findByText("Done.");
 
     openManualTab();
-    expect(screen.getByLabelText("Governing law (state)")).toHaveValue("Delaware");
+    expect(screen.getByLabelText("Governing law (state or country)")).toHaveValue("Delaware");
 
     fireEvent.click(screen.getByRole("tab", { name: "Chat" }));
     expect(screen.getByText(GREETING)).toBeInTheDocument();
@@ -145,7 +145,7 @@ describe("Home page", () => {
     const party1 = within(screen.getByRole("group", { name: "Party 1" }));
     await user.type(party1.getByLabelText("Company"), "Acme, Inc.");
     await user.type(party1.getByLabelText("Signer name"), "Jordan Lee");
-    await user.type(screen.getByLabelText("Governing law (state)"), "Delaware");
+    await user.type(screen.getByLabelText("Governing law (state or country)"), "Delaware");
 
     expect(preview().getByText("Acme, Inc.")).toBeInTheDocument();
     expect(preview().getByText("Jordan Lee")).toBeInTheDocument();

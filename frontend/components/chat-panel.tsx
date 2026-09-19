@@ -9,12 +9,20 @@ import {
 } from "react";
 import { type ChatMessage } from "@/lib/chat";
 
+export interface QuickPick {
+  label: string;
+  prompt: string;
+}
+
 interface ChatPanelProps {
   messages: ChatMessage[];
   sending: boolean;
   error: string | null;
   onSend: (text: string) => void;
   onRetry: () => void;
+  /** Optional one-tap suggestions rendered above the input; clicking one
+   * sends its prompt as a normal chat message. */
+  quickPicks?: QuickPick[];
 }
 
 const BUBBLE_USER =
@@ -34,14 +42,24 @@ export function ChatPanel({
   error,
   onSend,
   onRetry,
+  quickPicks,
 }: ChatPanelProps) {
   const [input, setInput] = useState("");
   const listRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const wasSending = useRef(sending);
 
   useEffect(() => {
     const list = listRef.current;
     if (list) list.scrollTop = list.scrollHeight;
   }, [messages.length, sending, error]);
+
+  // After a turn completes the textarea was disabled and lost focus;
+  // give it back so the user can keep typing.
+  useEffect(() => {
+    if (wasSending.current && !sending) inputRef.current?.focus();
+    wasSending.current = sending;
+  }, [sending]);
 
   const submit = () => {
     if (!input.trim() || sending) return;
@@ -101,6 +119,26 @@ export function ChatPanel({
         )}
       </div>
 
+      {quickPicks && quickPicks.length > 0 && (
+        <div
+          role="group"
+          aria-label="Suggested documents"
+          className="flex flex-wrap gap-1.5 border-t border-gray-text/25 px-5 py-2.5 sm:px-8"
+        >
+          {quickPicks.map((pick) => (
+            <button
+              key={pick.label}
+              type="button"
+              disabled={sending}
+              onClick={() => onSend(pick.prompt)}
+              className="rounded-full border border-blue-primary/40 px-3 py-1 text-xs font-medium text-blue-primary transition-colors hover:bg-blue-primary hover:text-white disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-blue-primary"
+            >
+              {pick.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       <form
         onSubmit={handleSubmit}
         className="border-t border-gray-text/25 px-5 py-3 sm:px-8"
@@ -111,6 +149,7 @@ export function ChatPanel({
           </label>
           <textarea
             id="chat-input"
+            ref={inputRef}
             rows={2}
             value={input}
             onChange={(event) => setInput(event.target.value)}
@@ -129,6 +168,10 @@ export function ChatPanel({
         </div>
         <p className="mt-1.5 text-xs text-gray-text">
           Enter to send · Shift+Enter for a new line
+        </p>
+        <p className="mt-1 text-xs text-gray-text">
+          AI-generated drafts aren&apos;t legal advice — have a lawyer review
+          before signing.
         </p>
       </form>
     </div>

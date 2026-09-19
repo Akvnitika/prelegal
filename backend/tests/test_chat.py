@@ -76,7 +76,7 @@ def test_chat_calls_llm_per_cerebras_skill(client: TestClient, mock_llm) -> None
     client.post("/api/chat", json=GOLDEN_REQUEST)
     assert len(mock_llm.calls) == 1
     kwargs = mock_llm.calls[0]
-    assert kwargs["model"] == "openrouter/~openai/gpt-sol-latest"
+    assert kwargs["model"] == "openrouter/openai/gpt-oss-120b"
     assert kwargs["extra_body"] == {"provider": {"order": ["cerebras"]}}
     assert kwargs["reasoning_effort"] == "low"
     assert kwargs["response_format"] is nda_chat.ChatTurnResult

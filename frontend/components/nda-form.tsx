@@ -225,14 +225,17 @@ export function NdaForm({ data, today, onChange }: NdaFormProps) {
       </Section>
 
       <Section legend="Governing law">
-        <Field label="Governing law (state)" htmlFor="governing-law">
+        <Field label="Governing law (state or country)" htmlFor="governing-law">
           <input
             id="governing-law"
             className={inputCls}
             value={data.governingLaw}
             onChange={(e) => update({ governingLaw: e.target.value })}
-            placeholder="Delaware"
+            placeholder="Delaware — or England and Wales"
           />
+          <p className="text-xs text-ink/75">
+            A U.S. state or another legal system, e.g. England and Wales.
+          </p>
         </Field>
         <Field label="Jurisdiction" htmlFor="jurisdiction">
           <input
@@ -240,10 +243,10 @@ export function NdaForm({ data, today, onChange }: NdaFormProps) {
             className={inputCls}
             value={data.jurisdiction}
             onChange={(e) => update({ jurisdiction: e.target.value })}
-            placeholder="New Castle County, Delaware"
+            placeholder="New Castle County, Delaware — or the courts of England and Wales"
           />
           <p className="text-xs text-ink/75">
-            The city or county whose courts will hear any dispute.
+            The courts that will hear any dispute.
           </p>
         </Field>
       </Section>

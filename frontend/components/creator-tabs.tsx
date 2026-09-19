@@ -1,18 +1,19 @@
 "use client";
 
-export type NdaTab = "chat" | "manual";
+export type CreatorTab = "chat" | "manual";
 
-const TABS: { id: NdaTab; label: string }[] = [
+const TABS: { id: CreatorTab; label: string }[] = [
   { id: "chat", label: "Chat" },
   { id: "manual", label: "Edit manually" },
 ];
 
-export function NdaTabs({
+/** The Chat | Edit manually switcher shared by both creator screens. */
+export function CreatorTabs({
   active,
   onChange,
 }: {
-  active: NdaTab;
-  onChange: (tab: NdaTab) => void;
+  active: CreatorTab;
+  onChange: (tab: CreatorTab) => void;
 }) {
   return (
     <div
