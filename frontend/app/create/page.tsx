@@ -1,11 +1,18 @@
-﻿"use client";
+"use client";
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { AppHeader } from "@/components/app-header";
 import { ChatPanel } from "@/components/chat-panel";
-import { DocumentGallery } from "@/components/document-picker";
+import {
+  DocumentGallery,
+  DocumentPreparingSkeleton,
+  GallerySkeleton,
+} from "@/components/document-picker";
+import { ErrorNotice } from "@/components/error-notice";
 import { GenericForm } from "@/components/generic-form";
 import { CreatorTabs, type CreatorTab } from "@/components/creator-tabs";
+import { type ChatMessage } from "@/lib/chat";
 import {
   MUTUAL_NDA_KEY,
   MUTUAL_NDA_SUMMARY,
@@ -16,14 +23,54 @@ import {
   generateGenericMarkdown,
   genericMarkdownFilename,
 } from "@/lib/generic-markdown";
+import {
+  deriveGenericTitle,
+  type SavedDocumentOut,
+} from "@/lib/saved-documents";
 import { parseTemplate } from "@/lib/template-parse";
 import { TemplateDocument } from "@/lib/template-render";
+import { LoadingScreen } from "@/components/loading-screen";
+import { useAutoSave } from "@/lib/use-auto-save";
 import { useDocChat } from "@/lib/use-doc-chat";
+import { restoreProps, useDocumentRestore } from "@/lib/use-document-restore";
+
+interface RestoredGeneric {
+  documentKey: string;
+  fields: Record<string, string>;
+  transcript: ChatMessage[];
+}
+
+function narrowGeneric(doc: SavedDocumentOut): RestoredGeneric | null {
+  if (doc.documentKey === MUTUAL_NDA_KEY || !("fields" in doc.data)) return null;
+  return {
+    documentKey: doc.documentKey,
+    fields: doc.data.fields,
+    transcript: doc.data.transcript,
+  };
+}
 
 export default function CreatePage() {
+  const restore = useDocumentRestore(narrowGeneric);
+  if (restore.status === "checking") return <LoadingScreen />;
+  return <CreatorScreen {...restoreProps(restore)} />;
+}
+
+function CreatorScreen({
+  restoredId,
+  initial,
+  restoreError,
+}: {
+  restoredId: number | null;
+  initial: RestoredGeneric | null;
+  restoreError: string | null;
+}) {
   const router = useRouter();
-  const [documentKey, setDocumentKey] = useState<string | null>(null);
-  const [fields, setFields] = useState<Record<string, string>>({});
+  const [documentKey, setDocumentKey] = useState<string | null>(
+    initial?.documentKey ?? null,
+  );
+  const [fields, setFields] = useState<Record<string, string>>(
+    initial?.fields ?? {},
+  );
   const [tab, setTab] = useState<CreatorTab>("chat");
 
   const catalog = useDocumentCatalog();
@@ -38,14 +85,18 @@ export default function CreatePage() {
     setDocumentKey(key);
   };
 
-  const chat = useDocChat(documentKey, fields, selectDocument, (patch) =>
-    setFields((prev) => ({ ...prev, ...patch })),
+  const chat = useDocChat(
+    documentKey,
+    fields,
+    selectDocument,
+    (patch) => setFields((prev) => ({ ...prev, ...patch })),
+    initial?.transcript,
   );
 
   // Kick-off turn: once a document is selected, let the assistant open the
-  // form conversation itself (introduce the document, ask the starting
-  // question) instead of waiting for the user to speak first.
-  const kickedOffFor = useRef<string | null>(null);
+  // form conversation itself. Seeded with any restored key so reopening a
+  // saved document never re-fires the opener.
+  const kickedOffFor = useRef<string | null>(initial?.documentKey ?? null);
   const { continueTurn } = chat;
   useEffect(() => {
     if (documentKey === null || kickedOffFor.current === documentKey) return;
@@ -59,6 +110,16 @@ export default function CreatePage() {
     () => (detail ? parseTemplate(detail.templateMarkdown) : null),
     [detail],
   );
+
+  const { status: saveStatus } = useAutoSave({
+    initialId: restoredId,
+    documentKey,
+    title: detail ? deriveGenericTitle(detail.name, fields) : "",
+    data: { fields, transcript: chat.messages },
+    // Choosing a document is the signal of intent; wait for its metadata so
+    // the derived title is right from the first save.
+    enabled: detail !== null,
+  });
 
   const allDocuments =
     catalog.documents.length > 0
@@ -87,30 +148,42 @@ export default function CreatePage() {
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="app-header flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-gray-text/25 bg-white px-5 py-3 sm:px-8">
-        <p className="font-serif text-xl font-semibold text-navy">prelegal</p>
-        <p className="text-sm text-gray-text">
-          {detail ? detail.name : "Document creator"}
-        </p>
-        <div className="ms-auto flex items-center gap-2.5">
-          <button
-            type="button"
-            disabled={!parsed}
-            onClick={() => window.print()}
-            className="rounded-md border border-gray-text/40 px-3.5 py-2 text-sm font-medium text-navy transition-colors hover:border-blue-primary hover:text-blue-primary disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-primary"
-          >
-            Print or save as PDF
-          </button>
-          <button
-            type="button"
-            disabled={!parsed}
-            onClick={downloadMarkdown}
-            className="rounded-md bg-purple-secondary px-3.5 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-secondary"
-          >
-            Download Markdown
-          </button>
+      <AppHeader
+        title={detail ? detail.name : "Document creator"}
+        saveStatus={
+          saveStatus === "saving"
+            ? "Saving…"
+            : saveStatus === "saved"
+              ? "Saved"
+              : undefined
+        }
+        actions={
+          <>
+            <button
+              type="button"
+              disabled={!parsed}
+              onClick={() => window.print()}
+              className="rounded-md border border-gray-text/40 px-3.5 py-2 text-sm font-medium text-navy transition-colors hover:border-blue-primary hover:text-blue-primary disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-primary"
+            >
+              Print or save as PDF
+            </button>
+            <button
+              type="button"
+              disabled={!parsed}
+              onClick={downloadMarkdown}
+              className="rounded-md bg-purple-secondary px-3.5 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-secondary"
+            >
+              Download Markdown
+            </button>
+          </>
+        }
+      />
+
+      {restoreError && (
+        <div className="border-b border-gray-text/25 bg-white px-5 py-2 sm:px-8">
+          <ErrorNotice message={restoreError} className="flex items-center gap-3" />
         </div>
-      </header>
+      )}
 
       <main className="flex-1 lg:grid lg:min-h-0 lg:grid-cols-[minmax(21rem,26rem)_1fr]">
         <div
@@ -175,37 +248,23 @@ export default function CreatePage() {
               <TemplateDocument parsed={parsed} fields={fields} />
             </div>
           ) : detailError ? (
-            <div className="mx-auto max-w-3xl text-sm">
-              <p role="alert" className="text-red-600">
-                {detailError}
-              </p>
-              <button
-                type="button"
-                onClick={retryDetail}
-                className="mt-1.5 font-medium text-blue-primary hover:underline"
-              >
-                Try again
-              </button>
-            </div>
+            <ErrorNotice
+              className="mx-auto max-w-3xl space-y-1.5 text-sm"
+              message={detailError}
+              onRetry={retryDetail}
+            />
+          ) : documentKey !== null ? (
+            <DocumentPreparingSkeleton />
+          ) : catalog.error ? (
+            <ErrorNotice
+              className="mx-auto max-w-3xl space-y-1.5 text-sm"
+              message={catalog.error}
+              onRetry={catalog.retry}
+            />
+          ) : allDocuments.length === 0 ? (
+            <GallerySkeleton />
           ) : (
-            <>
-              {catalog.error ? (
-                <div className="mx-auto max-w-3xl text-sm">
-                  <p role="alert" className="text-red-600">
-                    {catalog.error}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={catalog.retry}
-                    className="mt-1.5 font-medium text-blue-primary hover:underline"
-                  >
-                    Try again
-                  </button>
-                </div>
-              ) : (
-                <DocumentGallery documents={allDocuments} />
-              )}
-            </>
+            <DocumentGallery documents={allDocuments} />
           )}
         </div>
       </main>

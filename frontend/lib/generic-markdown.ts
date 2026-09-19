@@ -1,3 +1,4 @@
+import { DRAFT_NOTICE } from "@/lib/draft-notice";
 import { type FieldMeta } from "@/lib/documents";
 import {
   type ClauseNode,
@@ -83,7 +84,14 @@ export function generateGenericMarkdown(
   fieldMeta: FieldMeta[],
   fields: Record<string, string>,
 ): string {
-  const lines = [`# ${parsed.title}`, "", "## Key Terms", ""];
+  const lines = [
+    `# ${parsed.title}`,
+    "",
+    `> ${DRAFT_NOTICE}`,
+    "",
+    "## Key Terms",
+    "",
+  ];
   let group = "";
   for (const field of fieldMeta) {
     if (field.group !== group) {

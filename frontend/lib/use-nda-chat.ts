@@ -1,6 +1,6 @@
 "use client";
 
-import { initialMessages, postChat } from "@/lib/chat";
+import { initialMessages, postChat, type ChatMessage } from "@/lib/chat";
 import { type NdaData, type NdaDataPatch } from "@/lib/nda";
 import { useChatSession, type ChatSession } from "@/lib/use-chat-session";
 
@@ -13,9 +13,10 @@ export type NdaChat = ChatSession;
 export function useNdaChat(
   data: NdaData,
   onPatch: (patch: NdaDataPatch) => void,
+  restoredMessages?: ChatMessage[],
 ): NdaChat {
   return useChatSession(
-    initialMessages,
+    () => restoredMessages ?? initialMessages(),
     (transcript) => postChat(transcript, data),
     (response) => {
       onPatch(response.updates);

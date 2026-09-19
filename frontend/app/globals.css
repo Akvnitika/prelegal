@@ -9,15 +9,17 @@
   --color-highlight: #f4e48a;
   --color-paper: #ffffff;
 
-  /* Brand palette — new screens (login, future dashboard) and the AI chat
-     surfaces: the chat panel and the Chat/Edit-manually tab bar inside the
-     NDA creator (PL-6). The NDA document, manual form, and creator header
-     keep the pine tokens above; don't restyle one in the other's palette. */
+  /* Brand palette — every screen's chrome (headers, nav, forms, buttons,
+     focus rings) and the AI chat surfaces. Only the rendered document
+     itself (.paper / .nda-doc / .tmpl-doc — the print/export surface)
+     still uses the pine tokens above, so it reads as a distinct printed
+     page inside the app's brand-colored shell (PL-8). */
   --color-accent-yellow: #ecad0a;
   --color-blue-primary: #209dd7;
   --color-purple-secondary: #753991;
   --color-navy: #032147;
   --color-gray-text: #888888;
+  --color-danger: #dc2626;
 
   --font-sans: var(--font-plex-sans);
   --font-serif: var(--font-source-serif);
@@ -46,6 +48,19 @@ body {
   font-family: var(--font-serif);
   font-size: 0.9375rem;
   line-height: 1.7;
+}
+
+/* The draft stamp every generated document carries (PL-8) — deliberately
+   part of the document, so it prints and exports. */
+.nda-doc .draft-notice {
+  border: 1px solid color-mix(in srgb, var(--color-ink) 40%, transparent);
+  color: color-mix(in srgb, var(--color-ink) 78%, transparent);
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  margin-bottom: 1.75rem;
+  padding: 0.5rem 0.75rem;
+  text-align: center;
 }
 
 .nda-doc h1 {
@@ -334,6 +349,11 @@ body {
   .nda-doc mark.filled {
     background: none;
     padding: 0;
+  }
+
+  .nda-doc .draft-notice {
+    border-color: #000;
+    color: #000;
   }
 
   .nda-doc a,

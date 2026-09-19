@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from "react";
+import { DRAFT_NOTICE } from "@/lib/draft-notice";
 import {
   type ClauseNode,
   type InlineNode,
@@ -89,6 +90,7 @@ export function TemplateDocument({
       className="nda-doc tmpl-doc"
       aria-label={`${parsed.title} preview`}
     >
+      <p className="draft-notice">{DRAFT_NOTICE}</p>
       <h1>{parsed.title}</h1>
       <ClauseList clauses={parsed.clauses} fields={fields} depth={0} />
       <p className="doc-footer">

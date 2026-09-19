@@ -1,12 +1,23 @@
-﻿"use client";
+"use client";
 
 import { useState, useSyncExternalStore } from "react";
+import { AppHeader } from "@/components/app-header";
 import { ChatPanel } from "@/components/chat-panel";
+import { ErrorNotice } from "@/components/error-notice";
 import { NdaDocument } from "@/components/nda-document";
 import { NdaForm } from "@/components/nda-form";
 import { CreatorTabs, type CreatorTab } from "@/components/creator-tabs";
+import { type ChatMessage } from "@/lib/chat";
+import { MUTUAL_NDA_KEY } from "@/lib/documents";
 import { generateMarkdown, markdownFilename } from "@/lib/markdown";
-import { defaultNdaData, mergeNdaData, todayIso } from "@/lib/nda";
+import { defaultNdaData, mergeNdaData, todayIso, type NdaData } from "@/lib/nda";
+import {
+  deriveNdaTitle,
+  type SavedDocumentOut,
+} from "@/lib/saved-documents";
+import { LoadingScreen } from "@/components/loading-screen";
+import { useAutoSave } from "@/lib/use-auto-save";
+import { restoreProps, useDocumentRestore } from "@/lib/use-document-restore";
 import { useNdaChat } from "@/lib/use-nda-chat";
 
 const subscribeNever = () => () => {};
@@ -17,19 +28,61 @@ function useToday(): string {
   return useSyncExternalStore(subscribeNever, todayIso, () => "");
 }
 
-export default function Home() {
-  const [edited, setEdited] = useState(defaultNdaData);
+const DEFAULT_NDA_SNAPSHOT = JSON.stringify(defaultNdaData());
+
+interface RestoredNda {
+  nda: NdaData;
+  transcript: ChatMessage[];
+}
+
+function narrowNda(doc: SavedDocumentOut): RestoredNda | null {
+  if (doc.documentKey !== MUTUAL_NDA_KEY || !("nda" in doc.data)) return null;
+  return { nda: doc.data.nda, transcript: doc.data.transcript };
+}
+
+export default function NdaPage() {
+  const restore = useDocumentRestore(narrowNda);
+  if (restore.status === "checking") return <LoadingScreen />;
+  return <NdaCreatorScreen {...restoreProps(restore)} />;
+}
+
+function NdaCreatorScreen({
+  restoredId,
+  initial,
+  restoreError,
+}: {
+  restoredId: number | null;
+  initial: RestoredNda | null;
+  restoreError: string | null;
+}) {
+  const [edited, setEdited] = useState<NdaData>(
+    () => initial?.nda ?? defaultNdaData(),
+  );
   const [tab, setTab] = useState<CreatorTab>("chat");
   // Both editors work on the raw edited state (not `data`), preserving the
   // "" effective date so the document keeps floating to today until a
   // date is actually chosen; `data` resolves it for display only.
-  const chat = useNdaChat(edited, (patch) =>
-    setEdited((prev) => mergeNdaData(prev, patch)),
+  const chat = useNdaChat(
+    edited,
+    (patch) => setEdited((prev) => mergeNdaData(prev, patch)),
+    initial?.transcript,
   );
   const today = useToday();
   const data = edited.effectiveDate
     ? edited
     : { ...edited, effectiveDate: today };
+
+  // Auto-save snapshots the raw `edited` (not the display-resolved `data`),
+  // so an untouched document doesn't look "changed" every new day.
+  const { status: saveStatus } = useAutoSave({
+    initialId: restoredId,
+    documentKey: MUTUAL_NDA_KEY,
+    title: deriveNdaTitle(edited),
+    data: { nda: edited, transcript: chat.messages },
+    enabled:
+      JSON.stringify(edited) !== DEFAULT_NDA_SNAPSHOT ||
+      chat.messages.length > 1,
+  });
 
   const downloadMarkdown = () => {
     const blob = new Blob([generateMarkdown(data)], {
@@ -45,30 +98,44 @@ export default function Home() {
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="app-header flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-rule bg-paper px-5 py-3 sm:px-8">
-        <p className="font-serif text-xl font-semibold text-pine">prelegal</p>
-        <p className="text-sm text-ink/70">Mutual NDA creator</p>
-        <div className="ms-auto flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={() => window.print()}
-            className="rounded-md border border-rule px-3.5 py-2 text-sm font-medium text-ink transition-colors hover:border-pine hover:text-pine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pine"
-          >
-            Print or save as PDF
-          </button>
-          <button
-            type="button"
-            onClick={downloadMarkdown}
-            className="rounded-md bg-pine px-3.5 py-2 text-sm font-medium text-paper transition-colors hover:bg-pine-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pine"
-          >
-            Download Markdown
-          </button>
+      <AppHeader
+        title="Mutual NDA creator"
+        saveStatus={
+          saveStatus === "saving"
+            ? "Saving…"
+            : saveStatus === "saved"
+              ? "Saved"
+              : undefined
+        }
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="rounded-md border border-gray-text/40 px-3.5 py-2 text-sm font-medium text-navy transition-colors hover:border-blue-primary hover:text-blue-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-primary"
+            >
+              Print or save as PDF
+            </button>
+            <button
+              type="button"
+              onClick={downloadMarkdown}
+              className="rounded-md bg-purple-secondary px-3.5 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-secondary"
+            >
+              Download Markdown
+            </button>
+          </>
+        }
+      />
+
+      {restoreError && (
+        <div className="border-b border-gray-text/25 bg-white px-5 py-2 sm:px-8">
+          <ErrorNotice message={restoreError} className="flex items-center gap-3" />
         </div>
-      </header>
+      )}
 
       <main className="flex-1 lg:grid lg:min-h-0 lg:grid-cols-[minmax(21rem,26rem)_1fr]">
         <div
-          className={`form-pane flex flex-col border-b border-rule bg-paper lg:border-b-0 lg:border-e lg:[height:calc(100dvh-3.8rem)] ${
+          className={`form-pane flex flex-col border-b border-gray-text/25 bg-white lg:border-b-0 lg:border-e lg:[height:calc(100dvh-3.8rem)] ${
             tab === "chat" ? "max-lg:h-[70dvh]" : ""
           }`}
         >
@@ -98,7 +165,7 @@ export default function Home() {
               aria-labelledby="tab-manual"
               className="min-h-0 flex-1 px-5 py-6 sm:px-8 lg:overflow-y-auto"
             >
-              <p className="mb-2 text-sm leading-relaxed text-ink/70">
+              <p className="mb-2 text-sm leading-relaxed text-gray-text">
                 Fill in the details below. The agreement on the right updates as you
                 type, and you can download it when you&apos;re done.
               </p>

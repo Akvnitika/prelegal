@@ -1,4 +1,4 @@
-import { apiPost } from "@/lib/api";
+import { authorizedPost } from "@/lib/api";
 import { type ChatMessage } from "@/lib/chat";
 import { todayIso } from "@/lib/nda";
 
@@ -25,7 +25,7 @@ export const postDocChat = (
   documentKey: string | null,
   fields: Record<string, string>,
 ) =>
-  apiPost<DocChatResponseBody>("/api/doc-chat", {
+  authorizedPost<DocChatResponseBody>("/api/doc-chat", {
     transcript,
     documentKey,
     fields,

@@ -9,6 +9,7 @@ import {
   STANDARD_TERMS_URL,
   STANDARD_TERMS_VERSION,
 } from "./standard-terms";
+import { DRAFT_NOTICE } from "./draft-notice";
 import { toPlainTerms } from "./rich-text";
 
 function filled(value: string, placeholder: string): string {
@@ -25,6 +26,8 @@ export function generateMarkdown(data: NdaData): string {
 
   const lines: string[] = [
     "# Mutual Non-Disclosure Agreement",
+    "",
+    `> ${DRAFT_NOTICE}`,
     "",
     `This Mutual Non-Disclosure Agreement (the “MNDA”) consists of: (1) this Cover Page (“Cover Page”) and (2) the Common Paper Mutual NDA Standard Terms Version ${STANDARD_TERMS_VERSION} (“Standard Terms”) identical to those posted at ${STANDARD_TERMS_URL} and reproduced in full below. Any modifications of the Standard Terms should be made on the Cover Page, which will control over conflicts with the Standard Terms.`,
     "",

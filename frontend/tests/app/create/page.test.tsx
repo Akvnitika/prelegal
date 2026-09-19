@@ -18,6 +18,19 @@ vi.mock("@/lib/doc-chat", async (importOriginal) => ({
   postDocChat: postDocChatMock,
 }));
 
+// Auto-save and restore are exercised in their own suites; stubbed here so
+// late debounce timers never hit the network.
+const { fetchSavedDocumentMock } = vi.hoisted(() => ({
+  fetchSavedDocumentMock: vi.fn(),
+}));
+
+vi.mock("@/lib/saved-documents", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/saved-documents")>()),
+  fetchSavedDocument: fetchSavedDocumentMock,
+  createSavedDocument: vi.fn().mockResolvedValue({ id: 1 }),
+  updateSavedDocument: vi.fn().mockResolvedValue({ id: 1 }),
+}));
+
 const CSA_SUMMARY = {
   key: "csa",
   name: "Cloud Service Agreement",
@@ -64,8 +77,10 @@ vi.stubGlobal("fetch", fetchMock);
 
 afterEach(() => {
   postDocChatMock.mockReset();
+  fetchSavedDocumentMock.mockReset();
   push.mockReset();
   fetchMock.mockClear();
+  window.sessionStorage.clear();
 });
 
 const KICKOFF_REPLY =
@@ -143,6 +158,36 @@ describe("CreatePage", () => {
       role: "assistant",
       content: "A CSA fits your needs.",
     });
+  });
+
+  it("restores a saved document without re-running the kickoff", async () => {
+    window.sessionStorage.setItem("prelegal.openSavedDocument", "9");
+    fetchSavedDocumentMock.mockResolvedValue({
+      id: 9,
+      documentKey: "csa",
+      title: "Cloud Service Agreement — Acme, Inc.",
+      updatedAt: new Date().toISOString(),
+      data: {
+        fields: { Provider: "Acme, Inc." },
+        transcript: [
+          { role: "assistant", content: "Hi" },
+          { role: "user", content: "a CSA please" },
+          { role: "assistant", content: "Who is the provider?" },
+        ],
+      },
+    });
+    render(<CreatePage />);
+
+    expect(await screen.findByText("Who is the provider?")).toBeInTheDocument();
+    const preview = within(
+      await screen.findByRole("article", {
+        name: "Cloud Service Agreement preview",
+      }),
+    );
+    expect(preview.getByText("Acme, Inc.")).toBeInTheDocument();
+    // The restored transcript replaces the greeting, and the kickoff turn
+    // must not re-fire for an already-selected document.
+    expect(postDocChatMock).not.toHaveBeenCalled();
   });
 
   it("routes to /nda/ when the chat selects the Mutual NDA", async () => {
