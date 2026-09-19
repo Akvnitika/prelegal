@@ -109,4 +109,25 @@ describe("useDocChat", () => {
     act(() => hook.result.current.sendMessage("   "));
     expect(postDocChatMock).not.toHaveBeenCalled();
   });
+
+  it("continueTurn runs a turn on the current transcript without a user message", async () => {
+    postDocChatMock.mockResolvedValue({
+      reply: "Let's start — who is the provider?",
+      updates: {},
+    });
+    const { hook, fields } = setup("csa");
+
+    act(() => hook.result.current.continueTurn());
+    await waitFor(() => expect(hook.result.current.sending).toBe(false));
+
+    expect(postDocChatMock).toHaveBeenCalledWith(
+      [{ role: "assistant", content: GREETING }],
+      "csa",
+      fields,
+    );
+    expect(hook.result.current.messages).toEqual([
+      { role: "assistant", content: GREETING },
+      { role: "assistant", content: "Let's start — who is the provider?" },
+    ]);
+  });
 });

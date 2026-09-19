@@ -46,6 +46,11 @@ def test_filling_mode_lists_fields_with_current_values() -> None:
     assert "- Customer (null)" in system
     assert "[Parties]" in system
     assert "CATALOG" not in system
+    # Engagement rules: the assistant opens the form conversation itself,
+    # and announces readiness for review (with the legal-advice caveat).
+    assert "OPEN the conversation yourself" in system
+    assert "ready for review" in system
+    assert "not legal advice" in system
 
 
 def test_transcript_is_trimmed_with_note() -> None:

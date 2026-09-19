@@ -9,6 +9,10 @@ export interface ChatSession {
   sending: boolean;
   error: string | null;
   sendMessage: (text: string) => void;
+  /** Runs a turn on the current transcript without a new user message —
+   * used to let the assistant open the form conversation itself right
+   * after a document is selected. */
+  continueTurn: () => void;
   retry: () => void;
 }
 
@@ -49,11 +53,17 @@ export function useChatSession<TResponse>(
     void send([...messages, { role: "user", content }]);
   };
 
-  const retry = () => {
-    if (sending || !error) return;
-    if (messages[messages.length - 1]?.role !== "user") return;
+  const continueTurn = () => {
+    if (sending || messages.length === 0) return;
     void send(messages);
   };
 
-  return { messages, sending, error, sendMessage, retry };
+  // Re-sends the current transcript verbatim; works for failed user turns
+  // and failed continuation turns alike.
+  const retry = () => {
+    if (sending || !error || messages.length === 0) return;
+    void send(messages);
+  };
+
+  return { messages, sending, error, sendMessage, continueTurn, retry };
 }

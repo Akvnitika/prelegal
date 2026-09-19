@@ -42,6 +42,13 @@ describe("generateGenericMarkdown", () => {
   it("leaves no span markup behind", () => {
     expect(markdown).not.toMatch(/<\/?span/);
   });
+
+  it("ends with the Common Paper attribution", () => {
+    expect(markdown).toContain(
+      "Based on the Common Paper Test Agreement standard terms, free to use " +
+        "under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).",
+    );
+  });
 });
 
 describe("genericMarkdownFilename", () => {

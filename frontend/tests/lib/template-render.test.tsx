@@ -40,6 +40,19 @@ describe("TemplateDocument", () => {
     ).toBeGreaterThan(0);
   });
 
+  it("carries the Common Paper attribution footer", () => {
+    const { container } = render(
+      <TemplateDocument parsed={parsed} fields={{}} />,
+    );
+    const footer = container.querySelector(".doc-footer");
+    expect(footer).toHaveTextContent(
+      "Based on the Common Paper Test Agreement standard terms",
+    );
+    expect(
+      footer?.querySelector('a[href="https://creativecommons.org/licenses/by/4.0/"]'),
+    ).not.toBeNull();
+  });
+
   it("renders links safely in a new tab", () => {
     const { container } = render(
       <TemplateDocument parsed={parsed} fields={{}} />,

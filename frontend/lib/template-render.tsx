@@ -91,6 +91,18 @@ export function TemplateDocument({
     >
       <h1>{parsed.title}</h1>
       <ClauseList clauses={parsed.clauses} fields={fields} depth={0} />
+      <p className="doc-footer">
+        Based on the Common Paper {parsed.title} standard terms, free to use
+        under{" "}
+        <a
+          href="https://creativecommons.org/licenses/by/4.0/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          CC BY 4.0
+        </a>
+        .
+      </p>
     </article>
   );
 }

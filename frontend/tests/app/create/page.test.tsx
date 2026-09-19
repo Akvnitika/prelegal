@@ -68,10 +68,19 @@ afterEach(() => {
   fetchMock.mockClear();
 });
 
+const KICKOFF_REPLY =
+  "A CSA covers subscription access. First — who is the provider?";
+
+/** Selection now triggers an automatic kick-off turn, so two responses are
+ * queued: the selection reply, then the assistant's form opener. */
 async function selectCsaViaChat(user: ReturnType<typeof userEvent.setup>) {
-  postDocChatMock.mockResolvedValue({
-    reply: "A CSA fits. Who is the provider?",
+  postDocChatMock.mockResolvedValueOnce({
+    reply: "A CSA fits your needs.",
     selectedDocument: "csa",
+    updates: {},
+  });
+  postDocChatMock.mockResolvedValueOnce({
+    reply: KICKOFF_REPLY,
     updates: {},
   });
   await user.type(
@@ -79,7 +88,7 @@ async function selectCsaViaChat(user: ReturnType<typeof userEvent.setup>) {
     "We sell SaaS subscriptions",
   );
   await user.click(screen.getByRole("button", { name: "Send" }));
-  await screen.findByText("A CSA fits. Who is the provider?");
+  await screen.findByText(KICKOFF_REPLY);
 }
 
 describe("CreatePage", () => {
@@ -116,6 +125,24 @@ describe("CreatePage", () => {
     expect(
       screen.queryByRole("group", { name: "Suggested documents" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("automatically opens the form conversation after selection", async () => {
+    const user = userEvent.setup();
+    render(<CreatePage />);
+    await screen.findByRole("button", { name: "Cloud Service Agreement" });
+
+    await selectCsaViaChat(user);
+
+    expect(postDocChatMock).toHaveBeenCalledTimes(2);
+    const [transcript, key] = postDocChatMock.mock.calls[1];
+    expect(key).toBe("csa");
+    // The kick-off turn re-sends the transcript as-is — the assistant's
+    // selection reply is the last message, with no new user message.
+    expect(transcript[transcript.length - 1]).toEqual({
+      role: "assistant",
+      content: "A CSA fits your needs.",
+    });
   });
 
   it("routes to /nda/ when the chat selects the Mutual NDA", async () => {

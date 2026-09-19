@@ -139,6 +139,8 @@ def test_build_messages_includes_state_today_and_transcript() -> None:
     assert messages[0]["role"] == "system"
     system = messages[0]["content"]
     assert "Today's date: 2026-09-18" in system
+    assert "ready for review" in system
+    assert "not legal advice" in system
     assert '"governing_law": "Delaware"' in system
     # Empty strings are surfaced as null so the model sees them as unset.
     assert '"jurisdiction": null' in system

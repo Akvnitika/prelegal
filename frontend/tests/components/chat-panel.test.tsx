@@ -109,4 +109,11 @@ describe("ChatPanel", () => {
       screen.queryByRole("group", { name: "Suggested documents" }),
     ).not.toBeInTheDocument();
   });
+
+  it("always shows the not-legal-advice disclaimer", () => {
+    renderPanel();
+    expect(
+      screen.getByText(/aren't legal advice — have a lawyer review/i),
+    ).toBeInTheDocument();
+  });
 });

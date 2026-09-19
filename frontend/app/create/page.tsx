@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChatPanel } from "@/components/chat-panel";
 import { DocumentGallery } from "@/components/document-picker";
 import { GenericForm } from "@/components/generic-form";
@@ -41,6 +41,17 @@ export default function CreatePage() {
   const chat = useDocChat(documentKey, fields, selectDocument, (patch) =>
     setFields((prev) => ({ ...prev, ...patch })),
   );
+
+  // Kick-off turn: once a document is selected, let the assistant open the
+  // form conversation itself (introduce the document, ask the starting
+  // question) instead of waiting for the user to speak first.
+  const kickedOffFor = useRef<string | null>(null);
+  const { continueTurn } = chat;
+  useEffect(() => {
+    if (documentKey === null || kickedOffFor.current === documentKey) return;
+    kickedOffFor.current = documentKey;
+    continueTurn();
+  }, [documentKey, continueTurn]);
 
   // No field seeding needed: the form and preview both treat a missing key
   // as "", so `fields` only ever holds chat patches and manual edits.

@@ -95,7 +95,12 @@ export function generateGenericMarkdown(
   }
   lines.push("", "## Standard Terms", "");
   lines.push(...renderClauses(parsed.clauses, fields, 0, ""));
-  lines.push("");
+  lines.push(
+    "",
+    `Based on the Common Paper ${parsed.title} standard terms, free to use ` +
+      "under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).",
+    "",
+  );
   return lines.join("\n");
 }
 

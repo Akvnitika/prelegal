@@ -169,6 +169,10 @@ export function ChatPanel({
         <p className="mt-1.5 text-xs text-gray-text">
           Enter to send · Shift+Enter for a new line
         </p>
+        <p className="mt-1 text-xs text-gray-text">
+          AI-generated drafts aren&apos;t legal advice — have a lawyer review
+          before signing.
+        </p>
       </form>
     </div>
   );
