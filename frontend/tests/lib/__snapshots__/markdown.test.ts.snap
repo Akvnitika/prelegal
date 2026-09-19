@@ -3,6 +3,8 @@
 exports[`generateMarkdown > produces stable output for a fully filled agreement 1`] = `
 "# Mutual Non-Disclosure Agreement
 
+> DRAFT — Subject to review by qualified legal counsel. Not a final agreement.
+
 This Mutual Non-Disclosure Agreement (the “MNDA”) consists of: (1) this Cover Page (“Cover Page”) and (2) the Common Paper Mutual NDA Standard Terms Version 1.0 (“Standard Terms”) identical to those posted at https://commonpaper.com/standards/mutual-nda/1.0/ and reproduced in full below. Any modifications of the Standard Terms should be made on the Cover Page, which will control over conflicts with the Standard Terms.
 
 ## Cover Page
@@ -76,6 +78,8 @@ Common Paper Mutual Non-Disclosure Agreement (Version 1.0) free to use under [CC
 
 exports[`generateMarkdown > produces stable output for an empty agreement 1`] = `
 "# Mutual Non-Disclosure Agreement
+
+> DRAFT — Subject to review by qualified legal counsel. Not a final agreement.
 
 This Mutual Non-Disclosure Agreement (the “MNDA”) consists of: (1) this Cover Page (“Cover Page”) and (2) the Common Paper Mutual NDA Standard Terms Version 1.0 (“Standard Terms”) identical to those posted at https://commonpaper.com/standards/mutual-nda/1.0/ and reproduced in full below. Any modifications of the Standard Terms should be made on the Cover Page, which will control over conflicts with the Standard Terms.
 

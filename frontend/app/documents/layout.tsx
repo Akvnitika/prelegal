@@ -2,12 +2,11 @@ import type { Metadata } from "next";
 import { RequireAuth } from "@/components/require-auth";
 
 export const metadata: Metadata = {
-  title: "Document creator",
-  description:
-    "Draft a legal agreement with an AI assistant: pick a document type and fill it in through conversation.",
+  title: "My documents",
+  description: "Your saved agreements: reopen, continue, or download them.",
 };
 
-export default function CreateLayout({
+export default function DocumentsLayout({
   children,
 }: {
   children: React.ReactNode;

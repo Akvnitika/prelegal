@@ -7,6 +7,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
+import { ErrorNotice } from "@/components/error-notice";
 import { type ChatMessage } from "@/lib/chat";
 
 export interface QuickPick {
@@ -105,18 +106,7 @@ export function ChatPanel({
             </p>
           </div>
         )}
-        {error && (
-          <div role="alert" className="space-y-1.5">
-            <p className="text-sm text-red-600">{error}</p>
-            <button
-              type="button"
-              onClick={onRetry}
-              className="text-sm font-medium text-blue-primary hover:underline"
-            >
-              Try again
-            </button>
-          </div>
-        )}
+        {error && <ErrorNotice message={error} onRetry={onRetry} />}
       </div>
 
       {quickPicks && quickPicks.length > 0 && (

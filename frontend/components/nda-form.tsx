@@ -5,11 +5,11 @@ import { type NdaData, type PartyInfo } from "@/lib/nda";
 
 const inputCls =
   "w-full rounded-md border border-rule bg-paper px-3 py-2 text-sm text-ink " +
-  "placeholder:text-ink/40 focus:border-pine focus:outline-none focus:ring-2 focus:ring-pine/40";
+  "placeholder:text-ink/40 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-blue-primary";
 
 const yearsCls =
   "w-16 rounded-md border border-rule bg-paper px-2 py-1 text-sm text-ink " +
-  "focus:border-pine focus:outline-none focus:ring-2 focus:ring-pine/40 " +
+  "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-blue-primary " +
   "disabled:cursor-not-allowed disabled:opacity-40";
 
 function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: ReactNode }) {
@@ -160,7 +160,7 @@ export function NdaForm({ data, today, onChange }: NdaFormProps) {
             <input
               type="radio"
               name="mnda-term"
-              className="accent-pine"
+              className="accent-blue-primary"
               checked={data.mndaTermKind === "expires"}
               onChange={() => update({ mndaTermKind: "expires" })}
             />
@@ -179,7 +179,7 @@ export function NdaForm({ data, today, onChange }: NdaFormProps) {
             <input
               type="radio"
               name="mnda-term"
-              className="accent-pine"
+              className="accent-blue-primary"
               checked={data.mndaTermKind === "untilTerminated"}
               onChange={() => update({ mndaTermKind: "untilTerminated" })}
             />
@@ -193,7 +193,7 @@ export function NdaForm({ data, today, onChange }: NdaFormProps) {
             <input
               type="radio"
               name="confidentiality-term"
-              className="accent-pine"
+              className="accent-blue-primary"
               checked={data.confidentialityKind === "years"}
               onChange={() => update({ confidentialityKind: "years" })}
             />
@@ -211,7 +211,7 @@ export function NdaForm({ data, today, onChange }: NdaFormProps) {
             <input
               type="radio"
               name="confidentiality-term"
-              className="accent-pine"
+              className="accent-blue-primary"
               checked={data.confidentialityKind === "perpetuity"}
               onChange={() => update({ confidentialityKind: "perpetuity" })}
             />

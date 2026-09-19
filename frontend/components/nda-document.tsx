@@ -12,6 +12,7 @@ import {
   STANDARD_TERMS_VERSION,
   coverAnchor,
 } from "@/lib/standard-terms";
+import { DRAFT_NOTICE } from "@/lib/draft-notice";
 import { renderRichText } from "@/lib/rich-text";
 
 function Filled({ value, placeholder }: { value: string; placeholder: string }) {
@@ -50,6 +51,7 @@ export function NdaDocument({ data }: { data: NdaData }) {
 
   return (
     <article className="nda-doc" aria-label="Mutual Non-Disclosure Agreement preview">
+      <p className="draft-notice">{DRAFT_NOTICE}</p>
       <h1>Mutual Non-Disclosure Agreement</h1>
 
       <p className="doc-intro">

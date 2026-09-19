@@ -40,6 +40,10 @@ export const apiPost = <T>(path: string, body: unknown) =>
 
 function handleExpiredSession(): void {
   clearSession();
+  // A hard navigation on purpose: the session died mid-use (e.g. container
+  // restart), so a full reset to sign-in beats router state surgery. Module
+  // code has no access to the app router.
+  // eslint-disable-next-line @next/next/no-location-assign-relative-destination
   if (typeof window !== "undefined") window.location.assign("/");
 }
 

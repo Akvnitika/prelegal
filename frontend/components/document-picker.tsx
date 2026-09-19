@@ -2,6 +2,39 @@
 
 import { type DocumentSummary } from "@/lib/documents";
 
+/** Placeholder while the catalog loads, mirroring the gallery's card grid. */
+export function GallerySkeleton() {
+  return (
+    <div aria-hidden className="mx-auto max-w-3xl">
+      <div className="mb-2 h-6 w-64 animate-pulse rounded bg-gray-text/20" />
+      <div className="mb-5 h-4 w-80 animate-pulse rounded bg-gray-text/15" />
+      <ul className="grid gap-3 sm:grid-cols-2">
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <li
+            key={i}
+            className="h-28 animate-pulse rounded-lg border border-gray-text/25 bg-white"
+          />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Placeholder between choosing a document and its template arriving. */
+export function DocumentPreparingSkeleton() {
+  return (
+    <div className="paper">
+      <p className="mb-6 text-sm text-gray-text">Preparing your document…</p>
+      <div aria-hidden className="space-y-3">
+        <div className="h-7 w-2/3 animate-pulse rounded bg-gray-text/20" />
+        {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+          <div key={i} className="h-3 animate-pulse rounded bg-gray-text/15" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /** Read-only gallery shown in the preview pane until a document is chosen.
  * Selection itself happens in the chat (or its quick-pick chips). */
 export function DocumentGallery({

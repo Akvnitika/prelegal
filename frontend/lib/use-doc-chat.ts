@@ -1,5 +1,6 @@
 "use client";
 
+import { type ChatMessage } from "@/lib/chat";
 import { initialMessages, postDocChat } from "@/lib/doc-chat";
 import { useChatSession, type ChatSession } from "@/lib/use-chat-session";
 
@@ -16,9 +17,10 @@ export function useDocChat(
   fields: Record<string, string>,
   onSelectDocument: (key: string) => void,
   onFieldUpdates: (patch: Record<string, string>) => void,
+  restoredMessages?: ChatMessage[],
 ): DocChat {
   return useChatSession(
-    initialMessages,
+    () => restoredMessages ?? initialMessages(),
     (transcript) => postDocChat(transcript, documentKey, fields),
     (response) => {
       if (response.selectedDocument) onSelectDocument(response.selectedDocument);

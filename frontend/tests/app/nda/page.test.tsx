@@ -5,6 +5,24 @@ import Home from "@/app/nda/page";
 import { GREETING } from "@/lib/chat";
 import { formatEffectiveDate, todayIso } from "@/lib/nda";
 
+// The shared AppHeader needs a router; the saved-documents auto-save and
+// restore layers are exercised in their own suites and stubbed out here.
+const push = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push, replace: vi.fn() }),
+}));
+
+const { fetchSavedDocumentMock } = vi.hoisted(() => ({
+  fetchSavedDocumentMock: vi.fn(),
+}));
+
+vi.mock("@/lib/saved-documents", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/saved-documents")>()),
+  fetchSavedDocument: fetchSavedDocumentMock,
+  createSavedDocument: vi.fn().mockResolvedValue({ id: 1 }),
+  updateSavedDocument: vi.fn().mockResolvedValue({ id: 1 }),
+}));
+
 // The chat backend is mocked at the lib boundary; everything else (the
 // useNdaChat hook, the panels, the preview) runs for real.
 const { postChatMock } = vi.hoisted(() => ({ postChatMock: vi.fn() }));
@@ -38,6 +56,8 @@ afterAll(() => {
 afterEach(() => {
   vi.clearAllMocks();
   anchorClicks.length = 0;
+  window.sessionStorage.clear();
+  window.localStorage.clear();
 });
 
 function preview() {

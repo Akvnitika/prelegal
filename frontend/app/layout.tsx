@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Sans, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 
@@ -14,8 +14,12 @@ const sourceSerif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: "Sign in — prelegal",
+  title: { default: "Sign in — prelegal", template: "%s — prelegal" },
   description: "Sign in to start drafting legal agreements with prelegal.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#032147",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
