@@ -29,9 +29,10 @@ import {
 } from "@/lib/saved-documents";
 import { parseTemplate } from "@/lib/template-parse";
 import { TemplateDocument } from "@/lib/template-render";
+import { LoadingScreen } from "@/components/loading-screen";
 import { useAutoSave } from "@/lib/use-auto-save";
 import { useDocChat } from "@/lib/use-doc-chat";
-import { useDocumentRestore } from "@/lib/use-document-restore";
+import { restoreProps, useDocumentRestore } from "@/lib/use-document-restore";
 
 interface RestoredGeneric {
   documentKey: string;
@@ -50,20 +51,8 @@ function narrowGeneric(doc: SavedDocumentOut): RestoredGeneric | null {
 
 export default function CreatePage() {
   const restore = useDocumentRestore(narrowGeneric);
-  if (restore.status === "checking") {
-    return (
-      <div className="flex min-h-dvh items-center justify-center bg-desk">
-        <p className="text-sm text-gray-text">Loading…</p>
-      </div>
-    );
-  }
-  return (
-    <CreatorScreen
-      restoredId={restore.status === "restored" ? restore.id : null}
-      initial={restore.status === "restored" ? restore.data : null}
-      restoreError={restore.status === "error" ? restore.message : null}
-    />
-  );
+  if (restore.status === "checking") return <LoadingScreen />;
+  return <CreatorScreen {...restoreProps(restore)} />;
 }
 
 function CreatorScreen({

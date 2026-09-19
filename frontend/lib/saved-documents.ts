@@ -59,20 +59,19 @@ const HANDOFF_KEY = "prelegal.openSavedDocument";
 export const setOpenHandoff = (id: number) =>
   window.sessionStorage.setItem(HANDOFF_KEY, String(id));
 
-/** Pure read (safe during render): is a valid handoff waiting? */
-export const hasOpenHandoff = (): boolean => {
-  if (typeof window === "undefined") return false;
-  const id = Number(window.sessionStorage.getItem(HANDOFF_KEY));
-  return Number.isInteger(id) && id > 0;
-};
-
-export const takeOpenHandoff = (): number | null => {
+/** Pure read (safe during render and re-entrant effects): the waiting
+ * handoff id, if any. Consuming is a separate step (clearOpenHandoff) so
+ * React StrictMode's double-invoked effects can't lose the id. */
+export const peekOpenHandoff = (): number | null => {
   if (typeof window === "undefined") return null;
-  const raw = window.sessionStorage.getItem(HANDOFF_KEY);
-  window.sessionStorage.removeItem(HANDOFF_KEY);
-  const id = raw === null ? NaN : Number(raw);
+  const id = Number(window.sessionStorage.getItem(HANDOFF_KEY));
   return Number.isInteger(id) && id > 0 ? id : null;
 };
+
+export const hasOpenHandoff = (): boolean => peekOpenHandoff() !== null;
+
+export const clearOpenHandoff = () =>
+  window.sessionStorage.removeItem(HANDOFF_KEY);
 
 // --- Titles -----------------------------------------------------------------
 

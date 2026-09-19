@@ -15,8 +15,9 @@ import {
   deriveNdaTitle,
   type SavedDocumentOut,
 } from "@/lib/saved-documents";
+import { LoadingScreen } from "@/components/loading-screen";
 import { useAutoSave } from "@/lib/use-auto-save";
-import { useDocumentRestore } from "@/lib/use-document-restore";
+import { restoreProps, useDocumentRestore } from "@/lib/use-document-restore";
 import { useNdaChat } from "@/lib/use-nda-chat";
 
 const subscribeNever = () => () => {};
@@ -41,20 +42,8 @@ function narrowNda(doc: SavedDocumentOut): RestoredNda | null {
 
 export default function NdaPage() {
   const restore = useDocumentRestore(narrowNda);
-  if (restore.status === "checking") {
-    return (
-      <div className="flex min-h-dvh items-center justify-center bg-desk">
-        <p className="text-sm text-gray-text">Loading…</p>
-      </div>
-    );
-  }
-  return (
-    <NdaCreatorScreen
-      restoredId={restore.status === "restored" ? restore.id : null}
-      initial={restore.status === "restored" ? restore.data : null}
-      restoreError={restore.status === "error" ? restore.message : null}
-    />
-  );
+  if (restore.status === "checking") return <LoadingScreen />;
+  return <NdaCreatorScreen {...restoreProps(restore)} />;
 }
 
 function NdaCreatorScreen({

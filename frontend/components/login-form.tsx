@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { ErrorNotice } from "@/components/error-notice";
 import { ApiError } from "@/lib/api";
 import { signIn, signUp, storeSession } from "@/lib/auth";
 
@@ -88,11 +89,7 @@ export function LoginForm() {
         />
       </label>
 
-      {error && (
-        <p role="alert" className="mb-4 text-sm text-red-600">
-          {error}
-        </p>
-      )}
+      {error && <ErrorNotice message={error} className="mb-4" />}
 
       <button
         type="submit"

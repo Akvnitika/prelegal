@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useSyncExternalStore, type ReactNode } from "react";
+import { LoadingScreen } from "@/components/loading-screen";
 import {
   readSession,
   readSessionSnapshot,
@@ -29,12 +30,6 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     if (readSession() === null) router.replace("/");
   }, [session, router]);
 
-  if (session === null) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center bg-desk">
-        <p className="text-sm text-gray-text">Loading…</p>
-      </div>
-    );
-  }
+  if (session === null) return <LoadingScreen />;
   return <>{children}</>;
 }

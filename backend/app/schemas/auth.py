@@ -1,19 +1,21 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import ConfigDict, EmailStr, Field
+
+from app.schemas.camel import CamelModel
 
 
-class SignupRequest(BaseModel):
+class SignupRequest(CamelModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
     name: str | None = None
 
 
-class LoginRequest(BaseModel):
+class LoginRequest(CamelModel):
     email: EmailStr
     # No length rule here: a wrong short password is a 401, not a 422.
     password: str
 
 
-class UserOut(BaseModel):
+class UserOut(CamelModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -21,6 +23,6 @@ class UserOut(BaseModel):
     name: str | None
 
 
-class AuthResponse(BaseModel):
+class AuthResponse(CamelModel):
     token: str
     user: UserOut

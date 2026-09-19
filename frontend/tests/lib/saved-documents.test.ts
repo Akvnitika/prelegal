@@ -1,13 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { defaultNdaData } from "@/lib/nda";
 import {
+  clearOpenHandoff,
   createSavedDocument,
   deriveGenericTitle,
   deriveNdaTitle,
   fetchSavedDocuments,
   formatUpdatedAt,
+  peekOpenHandoff,
   setOpenHandoff,
-  takeOpenHandoff,
 } from "@/lib/saved-documents";
 import { storeSession } from "@/lib/session";
 
@@ -56,15 +57,17 @@ describe("CRUD wiring", () => {
 });
 
 describe("open handoff", () => {
-  it("round-trips an id and is single-use", () => {
+  it("peek is repeatable (StrictMode-safe) until explicitly cleared", () => {
     setOpenHandoff(42);
-    expect(takeOpenHandoff()).toBe(42);
-    expect(takeOpenHandoff()).toBeNull();
+    expect(peekOpenHandoff()).toBe(42);
+    expect(peekOpenHandoff()).toBe(42);
+    clearOpenHandoff();
+    expect(peekOpenHandoff()).toBeNull();
   });
 
   it("rejects garbage values", () => {
     window.sessionStorage.setItem("prelegal.openSavedDocument", "nope");
-    expect(takeOpenHandoff()).toBeNull();
+    expect(peekOpenHandoff()).toBeNull();
   });
 });
 

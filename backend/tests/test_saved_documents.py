@@ -33,6 +33,19 @@ def test_create_and_get_roundtrip(client: TestClient, auth_headers) -> None:
     assert fetched.json() == body
 
 
+def test_updated_at_is_serialized_with_utc_offset(
+    client: TestClient, auth_headers
+) -> None:
+    created = client.post(
+        "/api/saved-documents", json=NDA_DOC, headers=auth_headers
+    ).json()
+    # Zoneless timestamps get parsed as LOCAL time by browsers; the wire
+    # format must carry the UTC offset.
+    assert created["updatedAt"].endswith("+00:00") or created[
+        "updatedAt"
+    ].endswith("Z")
+
+
 def test_list_returns_summaries_without_data(
     client: TestClient, auth_headers
 ) -> None:
