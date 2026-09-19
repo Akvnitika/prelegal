@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { initialMessages, postChat, type ChatMessage } from "@/lib/chat";
+import { type ChatMessage } from "@/lib/chat";
 import { describeChatError } from "@/lib/chat-error";
-import { type NdaData, type NdaDataPatch } from "@/lib/nda";
+import { initialMessages, postDocChat } from "@/lib/doc-chat";
 
-export interface NdaChat {
+export interface DocChat {
   messages: ChatMessage[];
   sending: boolean;
   error: string | null;
@@ -14,14 +14,17 @@ export interface NdaChat {
 }
 
 /**
- * Chat state for the NDA creator. `data` is read at send time, so edits made
- * on the manual tab are always included in the next turn. On failure the
- * user's message stays in the transcript; retry() re-sends it unchanged.
+ * Chat state for the generic document creator. `documentKey`/`fields` are
+ * read at send time, so manual-tab edits are always included in the next
+ * turn. On a response, `onSelectDocument` runs before `onFieldUpdates` so a
+ * selection turn's eager field updates land on the newly selected document.
  */
-export function useNdaChat(
-  data: NdaData,
-  onPatch: (patch: NdaDataPatch) => void,
-): NdaChat {
+export function useDocChat(
+  documentKey: string | null,
+  fields: Record<string, string>,
+  onSelectDocument: (key: string) => void,
+  onFieldUpdates: (patch: Record<string, string>) => void,
+): DocChat {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,12 +34,13 @@ export function useNdaChat(
     setSending(true);
     setError(null);
     try {
-      const response = await postChat(transcript, data);
+      const response = await postDocChat(transcript, documentKey, fields);
       setMessages([
         ...transcript,
         { role: "assistant", content: response.reply },
       ]);
-      onPatch(response.updates);
+      if (response.selectedDocument) onSelectDocument(response.selectedDocument);
+      onFieldUpdates(response.updates ?? {});
     } catch (err) {
       setError(describeChatError(err));
     } finally {

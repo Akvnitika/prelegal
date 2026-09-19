@@ -77,4 +77,36 @@ describe("ChatPanel", () => {
     await user.click(screen.getByRole("button", { name: "Try again" }));
     expect(props.onRetry).toHaveBeenCalledTimes(1);
   });
+
+  it("returns focus to the input when a turn completes", () => {
+    const props = {
+      messages: MESSAGES,
+      sending: true,
+      error: null,
+      onSend: vi.fn(),
+      onRetry: vi.fn(),
+    };
+    const { rerender } = render(<ChatPanel {...props} />);
+    rerender(<ChatPanel {...props} sending={false} />);
+    expect(document.activeElement).toBe(
+      screen.getByLabelText("Message the drafting assistant"),
+    );
+  });
+
+  it("renders quick picks that send their prompt", async () => {
+    const user = userEvent.setup();
+    const props = renderPanel({
+      quickPicks: [{ label: "Pilot Agreement", prompt: "I need a Pilot Agreement." }],
+    });
+
+    await user.click(screen.getByRole("button", { name: "Pilot Agreement" }));
+    expect(props.onSend).toHaveBeenCalledWith("I need a Pilot Agreement.");
+  });
+
+  it("renders no chip row without quickPicks", () => {
+    renderPanel();
+    expect(
+      screen.queryByRole("group", { name: "Suggested documents" }),
+    ).not.toBeInTheDocument();
+  });
 });

@@ -6,6 +6,7 @@ import json
 from app.schemas.chat import ChatRequest
 from app.schemas.nda import DEFAULT_PURPOSE
 from app.services import nda_chat
+from app.services.chat_common import MAX_LLM_MESSAGES
 
 EMPTY_PARTY = {"company": "", "name": "", "title": "", "address": ""}
 
@@ -152,8 +153,8 @@ def test_build_messages_trims_long_transcript() -> None:
         {"role": "user", "content": f"message {i}"} for i in range(30)
     ]
     messages = nda_chat.build_messages(make_request(transcript=transcript))
-    assert len(messages) == 1 + nda_chat.MAX_LLM_MESSAGES
-    assert messages[1]["content"] == f"message {30 - nda_chat.MAX_LLM_MESSAGES}"
+    assert len(messages) == 1 + MAX_LLM_MESSAGES
+    assert messages[1]["content"] == f"message {30 - MAX_LLM_MESSAGES}"
     assert "omitted" in messages[0]["content"]
 
 

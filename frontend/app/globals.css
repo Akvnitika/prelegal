@@ -201,6 +201,98 @@ body {
   margin-top: 2rem;
 }
 
+/* ---------- Generic template preview (PL-7) ---------- */
+/* Nested clause numbering: depth 0 "1.", depth 1 "1.1.", depth 2 "a.",
+   depth 3 "i." — matching the Common Paper templates' own convention.
+   (No template nests deeper than depth 3 today.) */
+
+.tmpl-doc .clause-heading {
+  font-weight: 600;
+}
+
+.tmpl-doc .clause-heading-2 {
+  font-size: 1.05rem;
+}
+
+.tmpl-doc .clauses,
+.tmpl-doc .clauses ol {
+  list-style: none;
+  margin: 0.4rem 0;
+  padding: 0;
+}
+
+.tmpl-doc .clauses {
+  counter-reset: c1;
+}
+
+.tmpl-doc .clauses > li {
+  counter-increment: c1;
+  margin: 0.85rem 0;
+  padding-left: 1.9em;
+  position: relative;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.tmpl-doc .clauses > li::before {
+  content: counter(c1) ".";
+  font-weight: 600;
+  left: 0;
+  position: absolute;
+}
+
+.tmpl-doc .clauses > li > ol {
+  counter-reset: c2;
+}
+
+.tmpl-doc .clauses > li > ol > li {
+  counter-increment: c2;
+  padding-left: 2.3em;
+  position: relative;
+  margin: 0.6rem 0;
+}
+
+.tmpl-doc .clauses > li > ol > li::before {
+  content: counter(c1) "." counter(c2) ".";
+  font-weight: 600;
+  left: 0;
+  position: absolute;
+}
+
+.tmpl-doc .clauses > li > ol > li > ol {
+  counter-reset: c3;
+}
+
+.tmpl-doc .clauses > li > ol > li > ol > li {
+  counter-increment: c3;
+  padding-left: 1.6em;
+  position: relative;
+  margin: 0.45rem 0;
+}
+
+.tmpl-doc .clauses > li > ol > li > ol > li::before {
+  content: counter(c3, lower-alpha) ".";
+  left: 0;
+  position: absolute;
+}
+
+.tmpl-doc .clauses > li > ol > li > ol > li > ol {
+  counter-reset: c4;
+}
+
+.tmpl-doc .clauses > li > ol > li > ol > li > ol > li {
+  counter-increment: c4;
+  padding-left: 1.8em;
+  position: relative;
+  margin: 0.45rem 0;
+}
+
+.tmpl-doc .clauses > li > ol > li > ol > li > ol > li::before {
+  content: counter(c4, lower-roman) ".";
+  left: 0;
+  position: absolute;
+}
+
 /* ---------- Print: the sheet becomes the page ---------- */
 
 @page {

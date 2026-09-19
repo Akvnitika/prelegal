@@ -29,7 +29,7 @@ export function LoginForm() {
         ...(mode === "signup" && name ? { name } : {}),
       });
       storeSession(user);
-      router.push("/nda/");
+      router.push("/create/");
     } catch {
       setError("Something went wrong. Please try again.");
       setSubmitting(false);

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+﻿import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LoginForm } from "@/components/login-form";
@@ -37,7 +37,7 @@ describe("LoginForm", () => {
     expect(screen.getByLabelText("Name")).toBeInTheDocument();
   });
 
-  it("signs in, stores the session, and navigates to /nda/", async () => {
+  it("signs in, stores the session, and navigates to /create/", async () => {
     fetchMock.mockResolvedValue(
       new Response(JSON.stringify({ user }), { status: 200 }),
     );
@@ -57,7 +57,7 @@ describe("LoginForm", () => {
     expect(window.localStorage.getItem("prelegal.currentUser")).toBe(
       JSON.stringify(user),
     );
-    expect(push).toHaveBeenCalledWith("/nda/");
+    expect(push).toHaveBeenCalledWith("/create/");
   });
 
   it("signs up through the signup endpoint including the name", async () => {
@@ -86,7 +86,7 @@ describe("LoginForm", () => {
         }),
       }),
     );
-    expect(push).toHaveBeenCalledWith("/nda/");
+    expect(push).toHaveBeenCalledWith("/create/");
   });
 
   it("shows an error and stays put when the request fails", async () => {

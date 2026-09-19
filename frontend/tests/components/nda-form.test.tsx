@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+﻿import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";
@@ -50,7 +50,7 @@ describe("NdaForm", () => {
 
       const party1 = within(screen.getByRole("group", { name: "Party 1" }));
       await user.type(party1.getByLabelText("Company"), "Acme");
-      await user.type(screen.getByLabelText("Governing law (state)"), "Delaware");
+      await user.type(screen.getByLabelText("Governing law (state or country)"), "Delaware");
 
       expect(latest.data.effectiveDate).toBe("");
     });
@@ -148,7 +148,7 @@ describe("NdaForm", () => {
     it("updates governing law and jurisdiction", async () => {
       const user = userEvent.setup();
       const latest = renderForm();
-      await user.type(screen.getByLabelText("Governing law (state)"), "Delaware");
+      await user.type(screen.getByLabelText("Governing law (state or country)"), "Delaware");
       await user.type(screen.getByLabelText("Jurisdiction"), "New Castle County");
       expect(latest.data.governingLaw).toBe("Delaware");
       expect(latest.data.jurisdiction).toBe("New Castle County");

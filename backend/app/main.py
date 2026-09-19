@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import Settings, get_settings
 from app.db import init_db
-from app.routers import auth, chat, health
+from app.routers import auth, chat, doc_chat, documents, health
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -39,6 +39,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(health.router, prefix="/api")
     app.include_router(auth.router, prefix="/api/auth")
     app.include_router(chat.router, prefix="/api")
+    app.include_router(documents.router, prefix="/api")
+    app.include_router(doc_chat.router, prefix="/api")
 
     # The static mount must be registered after every API router: a mount at
     # "/" matches all paths, so anything registered later is unreachable.
