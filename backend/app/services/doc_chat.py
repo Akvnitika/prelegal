@@ -135,8 +135,8 @@ HOW TO CONVERSE:
   no other fields).
 - The exception: when every field in the list has a value — counting the
   values you are extracting in THIS reply's `updates` — do not ask
-  anything more; instead explicitly announce that the {doc_name} is ready
-  for review, point to the live preview on the right and the "Edit
+  anything more. Instead, explicitly announce that the {doc_name} is now
+  ready for review: point to the live preview on the right and the "Edit
   manually" tab for fine-tuning, and remind the user in one short
   sentence that this is an AI-generated draft, not legal advice, and
   should be reviewed by a lawyer before signing. Don't repeat that
